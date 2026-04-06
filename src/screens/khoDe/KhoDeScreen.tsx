@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
-import { SearchBar, Chip, Card } from '../../components';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { DashboardStackParamList, Exam } from '../../types';
 
@@ -12,128 +10,222 @@ interface Props {
   navigation: NativeStackNavigationProp<DashboardStackParamList>;
 }
 
-const TABS = [
+type TabKey = 'all' | 'open' | 'draft' | 'closed';
+
+const TABS: { key: TabKey; label: string }[] = [
+  { key: 'all', label: 'Tất cả' },
   { key: 'open', label: 'Đang mở' },
   { key: 'draft', label: 'Bản nháp' },
   { key: 'closed', label: 'Đã đóng' },
 ];
 
-const MOCK_EXAMS: Exam[] = [
-  { id: '1', title: 'Toán học - HKI', subject: 'Toán', grade: 'Lớp 10', duration: 60, status: 'open', questionCount: 20, createdAt: '2026-03-01', updatedAt: '2026-03-15' },
-  { id: '2', title: 'Vật lý - HKII', subject: 'Vật lý', grade: 'Lớp 11', duration: 45, status: 'open', questionCount: 15, createdAt: '2026-02-20', updatedAt: '2026-03-10' },
-  { id: '3', title: 'Ngữ văn - HKI', subject: 'Ngữ văn', grade: 'Lớp 12', duration: 90, status: 'open', questionCount: 30, createdAt: '2026-02-15', updatedAt: '2026-03-05' },
-  { id: '4', title: 'Hóa học - HKI', subject: 'Hóa', grade: 'Lớp 12', duration: 60, status: 'draft', questionCount: 25, createdAt: '2026-03-10', updatedAt: '2026-03-12' },
-  { id: '5', title: 'Sinh học - HKII', subject: 'Sinh', grade: 'Lớp 11', duration: 45, status: 'draft', questionCount: 20, createdAt: '2026-03-08', updatedAt: '2026-03-09' },
-  { id: '6', title: 'Lịch sử - HKI', subject: 'Sử', grade: 'Lớp 10', duration: 60, status: 'closed', questionCount: 25, createdAt: '2026-01-10', updatedAt: '2026-02-01' },
-  { id: '7', title: 'Địa lý - HKII', subject: 'Địa', grade: 'Lớp 11', duration: 45, status: 'closed', questionCount: 20, createdAt: '2026-01-05', updatedAt: '2026-01-28' },
+const MOCK_EXAMS: (Exam & { subjectColor: string; studentCount?: number; aiBadge?: boolean })[] = [
+  {
+    id: '1',
+    title: 'Kiểm tra 15 phút - Chương 1',
+    subject: 'Toán học 12',
+    grade: '12',
+    duration: 15,
+    status: 'open',
+    questionCount: 0,
+    createdAt: '20/10/2025',
+    updatedAt: '20/10/2025',
+    subjectColor: '#DCFCE7',
+    studentCount: 45,
+  },
+  {
+    id: '2',
+    title: 'Đề thi giữa kỳ I - Hóa học',
+    subject: 'Hóa học 10',
+    grade: '10',
+    duration: 45,
+    status: 'draft',
+    questionCount: 0,
+    createdAt: '15/10/2025',
+    updatedAt: '15/10/2025',
+    subjectColor: '#FFF7ED',
+  },
+  {
+    id: '3',
+    title: 'Ôn tập văn học hiện đại',
+    subject: 'Ngữ Văn 11',
+    grade: '11',
+    duration: 90,
+    status: 'closed',
+    questionCount: 0,
+    createdAt: '10/10/2025',
+    updatedAt: '10/10/2025',
+    subjectColor: '#EFF6FF',
+  },
+  {
+    id: '4',
+    title: 'Đề thi Tiếng Anh (AI)',
+    subject: 'Tiếng Anh 12',
+    grade: '12',
+    duration: 60,
+    status: 'draft',
+    questionCount: 0,
+    createdAt: 'Vừa tạo',
+    updatedAt: 'Vừa tạo',
+    subjectColor: '#C4EDD4',
+    aiBadge: true,
+  },
 ];
 
+const STATUS_STYLES = {
+  open: { bg: '#ECFDF5', text: '#047857', dot: '#21C05D' },
+  draft: { bg: '#FFF7ED', text: '#B45309', dot: '#F59E0B' },
+  closed: { bg: '#F1F5F9', text: '#5C697B', dot: '#94A3B8' },
+};
+
+const STATUS_LABELS = { open: 'Đang mở', draft: 'Bản nháp', closed: 'Đã đóng' };
+
+// Subject icon map
+const SUBJECT_ICONS: Record<string, string> = {
+  'Toán': 'calculator',
+  'Hóa': 'flask',
+  'Văn': 'book',
+  'Anh': 'language',
+  'Sử': 'time',
+  'Địa': 'globe',
+  'Lý': 'flash',
+  'Sinh': 'leaf',
+};
+
 export const KhoDeScreen: React.FC<Props> = ({ navigation }) => {
-  const [activeTab, setActiveTab] = useState<'open' | 'draft' | 'closed'>('open');
+  const [activeTab, setActiveTab] = useState<TabKey>('all');
   const [search, setSearch] = useState('');
 
-  const filtered = MOCK_EXAMS.filter(
-    (e) =>
-      e.status === activeTab &&
-      (e.title.toLowerCase().includes(search.toLowerCase()) ||
-        e.subject.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filtered = MOCK_EXAMS.filter((e) => {
+    const tabMatch = activeTab === 'all' || e.status === activeTab;
+    const searchMatch =
+      !search ||
+      e.title.toLowerCase().includes(search.toLowerCase()) ||
+      e.subject.toLowerCase().includes(search.toLowerCase());
+    return tabMatch && searchMatch;
+  });
 
-  const getStatusColor = (status: string) => {
-    if (status === 'open') return Colors.success;
-    if (status === 'draft') return Colors.warning;
-    return Colors.gray50;
+  const getSubjectIcon = (subject: string): string => {
+    for (const [key, icon] of Object.entries(SUBJECT_ICONS)) {
+      if (subject.includes(key)) return icon;
+    }
+    return 'document-text';
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Kho đề thi</Text>
-        <TouchableOpacity style={styles.addBtn} onPress={() => navigation.navigate('TaoDeThi')}>
-          <Ionicons name="add" size={24} color={Colors.white} />
-        </TouchableOpacity>
-      </View>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Kho đề thi</Text>
+          <TouchableOpacity
+            style={styles.addBtn}
+            onPress={() => navigation.navigate('TaoDeThi')}
+          >
+            <View style={styles.addBtnBg} />
+            <Ionicons name="add" size={20} color={Colors.primary} />
+          </TouchableOpacity>
+        </View>
 
-      {/* Search */}
-      <View style={styles.searchRow}>
-        <SearchBar value={search} onChangeText={setSearch} style={{ flex: 1 }} placeholder="Tìm kiếm đề thi..." />
-      </View>
-
-      {/* Tabs */}
-      <View style={styles.tabsRow}>
-        {TABS.map((tab) => (
-          <Chip
-            key={tab.key}
-            label={tab.label}
-            active={activeTab === tab.key}
-            color={Colors.primary}
-            onPress={() => setActiveTab(tab.key as any)}
-            style={{ marginRight: 8 }}
+        {/* Search Bar */}
+        <View style={styles.searchWrap}>
+          <Ionicons name="search" size={20} color="#6C757D" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Tìm kiếm đề thi, môn học"
+            placeholderTextColor="#6C757D"
+            value={search}
+            onChangeText={setSearch}
           />
-        ))}
-      </View>
+        </View>
 
-      {/* List */}
-      <FlatList
-        data={filtered}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Ionicons name="folder-open-outline" size={48} color={Colors.gray30} />
-            <Text style={styles.emptyText}>Không có đề thi nào</Text>
-          </View>
-        }
-        renderItem={({ item }) => (
-          <Card style={styles.card} onPress={() => navigation.navigate('KhoDeDetail', { tab: item.status })}>
-            <View style={styles.cardTop}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.cardTitle}>{item.title}</Text>
-                <Text style={styles.cardMeta}>{item.subject} · {item.grade}</Text>
-              </View>
-              <Chip
-                label={activeTab === 'open' ? 'Đang mở' : activeTab === 'draft' ? 'Bản nháp' : 'Đã đóng'}
-                color={getStatusColor(item.status)}
-                active
-              />
-            </View>
-            <View style={styles.cardFooter}>
-              <View style={styles.cardMetaRow}>
-                <Ionicons name="help-circle-outline" size={14} color={Colors.gray50} />
-                <Text style={styles.cardMetaText}>{item.questionCount} câu hỏi</Text>
-              </View>
-              <View style={styles.cardMetaRow}>
-                <Ionicons name="time-outline" size={14} color={Colors.gray50} />
-                <Text style={styles.cardMetaText}>{item.duration} phút</Text>
-              </View>
+        {/* Pill Tabs */}
+        <View style={styles.tabsWrap}>
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.key;
+            return (
               <TouchableOpacity
-                onPress={() => navigation.navigate('PhatDe', { examId: item.id })}
+                key={tab.key}
+                style={[styles.pillTab, isActive && styles.pillTabActive]}
+                onPress={() => setActiveTab(tab.key)}
               >
-                <Ionicons name="share-outline" size={20} color={Colors.primary} />
+                <Text style={[styles.pillTabText, isActive && styles.pillTabTextActive]}>
+                  {tab.label}
+                </Text>
               </TouchableOpacity>
-            </View>
-            {/* Action buttons */}
-            <View style={styles.cardActions}>
+            );
+          })}
+        </View>
+
+        {/* Exam List */}
+        <View style={styles.listWrap}>
+          {filtered.map((exam) => {
+            const status = STATUS_STYLES[exam.status];
+            const subjectLower = exam.subject.toLowerCase();
+            const iconName = Object.entries(SUBJECT_ICONS).reduce<string>((acc, [k, v]) => {
+              if (subjectLower.includes(k.toLowerCase())) return v;
+              return acc;
+            }, 'document-text');
+
+            return (
               <TouchableOpacity
-                style={styles.actionBtn}
-                onPress={() => navigation.navigate('SoanThaoCauHoi', { examId: item.id })}
+                key={exam.id}
+                style={[
+                  styles.examCard,
+                  exam.aiBadge && styles.examCardAi,
+                ]}
+                onPress={() => navigation.navigate('KhoDeDetail', { tab: exam.status })}
+                activeOpacity={0.8}
               >
-                <Ionicons name="create-outline" size={16} color={Colors.info} />
-                <Text style={[styles.actionText, { color: Colors.info }]}>Sửa</Text>
+                {/* More button */}
+                <TouchableOpacity style={styles.moreBtn} onPress={() => {}}>
+                  <Ionicons name="ellipsis-horizontal" size={20} color="#6C757D" />
+                </TouchableOpacity>
+
+                {/* Subject icon badge */}
+                <View style={[styles.subjectBadge, { backgroundColor: exam.subjectColor }]}>
+                  <Ionicons
+                    name={iconName as any}
+                    size={22}
+                    color={exam.aiBadge ? Colors.primary : '#6C757D'}
+                  />
+                </View>
+
+                {/* Main info */}
+                <Text style={styles.examTitle}>{exam.title}</Text>
+                <Text style={styles.examSubject}>{exam.subject}</Text>
+                <Text style={styles.examDate}>{exam.createdAt}</Text>
+
+                {/* Bottom row */}
+                <View style={styles.examBottom}>
+                  {/* Status chip */}
+                  <View style={[styles.statusChip, { backgroundColor: status.bg }]}>
+                    <View style={[styles.statusDot, { backgroundColor: status.dot }]} />
+                    <Text style={[styles.statusText, { color: status.text }]}>
+                      {STATUS_LABELS[exam.status]}
+                    </Text>
+                  </View>
+
+                  {/* Student count or AI badge */}
+                  {exam.aiBadge ? (
+                    <View style={styles.aiBadgeWrap}>
+                      <Ionicons name="bulb" size={18} color={Colors.primary} />
+                      <Text style={styles.aiBadgeText}>Tạo bởi AI</Text>
+                    </View>
+                  ) : exam.studentCount ? (
+                    <View style={styles.studentCountWrap}>
+                      <Ionicons name="people-outline" size={18} color="#6C757D" />
+                      <Text style={styles.studentCountText}>{exam.studentCount} học sinh</Text>
+                    </View>
+                  ) : null}
+                </View>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.actionBtn}
-                onPress={() => navigation.navigate('ChinhSuaCauHoi', { examId: item.id, questionId: '1' })}
-              >
-                <Ionicons name="help-buoy-outline" size={16} color={Colors.warning} />
-                <Text style={[styles.actionText, { color: Colors.warning }]}>Câu hỏi</Text>
-              </TouchableOpacity>
-            </View>
-          </Card>
-        )}
-      />
+            );
+          })}
+        </View>
+
+        <View style={{ height: 120 }} />
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -144,32 +236,163 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 4,
+    paddingHorizontal: 17,
+    paddingTop: 12,
+    backgroundColor: Colors.screenBg,
   },
-  title: { fontSize: 24, fontWeight: '700', color: Colors.textPrimary },
-  addBtn: {
-    width: 40,
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    letterSpacing: -0.6,
+  },
+  addBtn: { width: 35, height: 35, alignItems: 'center', justifyContent: 'center' },
+  addBtnBg: {
+    position: 'absolute',
+    width: 35,
+    height: 35,
+    borderRadius: 17.5,
+    backgroundColor: Colors.primaryLight,
+  },
+  searchWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    marginHorizontal: 17,
+    marginTop: 12,
+    paddingHorizontal: 14,
+    height: 50,
+    borderRadius: 12,
+    gap: 12,
+    shadowColor: 'rgba(0,0,0,0.15)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: Colors.textPrimary,
+  },
+  tabsWrap: {
+    flexDirection: 'row',
+    paddingHorizontal: 17,
+    marginTop: 15,
+    gap: 6,
+  },
+  pillTab: {
     height: 40,
-    borderRadius: 20,
+    borderRadius: 50,
+    backgroundColor: '#E9ECEF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+  },
+  pillTabActive: {
     backgroundColor: Colors.primary,
+  },
+  pillTabText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#8B9299',
+  },
+  pillTabTextActive: {
+    fontWeight: '700',
+    color: Colors.white,
+  },
+  listWrap: {
+    paddingHorizontal: 17,
+    marginTop: 15,
+    gap: 10,
+  },
+  examCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    padding: 14,
+    position: 'relative',
+    shadowColor: 'rgba(0,0,0,0.15)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  examCardAi: {
+    borderWidth: 1,
+    borderColor: 'rgba(33,196,93,0.2)',
+  },
+  moreBtn: {
+    position: 'absolute',
+    top: 10,
+    right: 12,
+    padding: 2,
+    zIndex: 1,
+  },
+  subjectBadge: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 8,
   },
-  searchRow: { paddingHorizontal: 20, paddingVertical: 8 },
-  tabsRow: { flexDirection: 'row', paddingHorizontal: 20, paddingBottom: 8 },
-  list: { paddingHorizontal: 20, paddingBottom: 120 },
-  card: { marginBottom: 12 },
-  cardTop: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 },
-  cardTitle: { fontSize: 15, fontWeight: '600', color: Colors.textPrimary },
-  cardMeta: { fontSize: 13, color: Colors.textSecondary, marginTop: 2 },
-  cardFooter: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  cardMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  cardMetaText: { fontSize: 12, color: Colors.gray50 },
-  cardActions: { flexDirection: 'row', marginTop: 12, borderTopWidth: 1, borderTopColor: Colors.gray20, paddingTop: 10, gap: 24 },
-  actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  actionText: { fontSize: 13, fontWeight: '500' },
-  empty: { alignItems: 'center', paddingTop: 60 },
-  emptyText: { fontSize: 15, color: Colors.gray50, marginTop: 12 },
+  examTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginBottom: 4,
+  },
+  examSubject: {
+    fontSize: 12,
+    color: '#6E6E6E',
+    marginBottom: 2,
+  },
+  examDate: {
+    fontSize: 12,
+    color: '#6E6E6E',
+    marginBottom: 10,
+  },
+  examBottom: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 2,
+  },
+  statusChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 30,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    gap: 5,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  statusText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  studentCountWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  studentCountText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6C757D',
+  },
+  aiBadgeWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  aiBadgeText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: Colors.primary,
+  },
 });

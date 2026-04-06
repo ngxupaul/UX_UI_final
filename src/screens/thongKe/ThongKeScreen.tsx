@@ -1,10 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
-import { Card } from '../../components';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { DashboardStackParamList } from '../../types';
 
@@ -12,96 +10,159 @@ interface Props {
   navigation: NativeStackNavigationProp<DashboardStackParamList>;
 }
 
-const STATS = [
-  { label: 'Tổng đề thi', value: '12', icon: 'document-text-outline' as const, color: Colors.primary },
-  { label: 'Đề đang mở', value: '5', icon: 'play-circle-outline' as const, color: Colors.success },
-  { label: 'Tổng lượt làm', value: '1,248', icon: 'people-outline' as const, color: Colors.info },
-  { label: 'Điểm trung bình', value: '7.8', icon: 'trending-up-outline' as const, color: Colors.warning },
+const STUDENTS = [
+  { id: '1', name: 'Trần Thị Bích Ngọc', initials: null, avatar: 'https://www.figma.com/api/mcp/asset/b3bff294-d025-48e2-bec7-f25aeb9942c0', score: 9.5, grade: 'Xuất sắc', gradeColor: '#16A34A', bgColor: '#DCFCE7', time: '09:15 AM' },
+  { id: '2', name: 'Lê Minh', initials: 'LM', avatar: null, score: 8.8, grade: 'Giỏi', gradeColor: '#16A34A', bgColor: '#DCFCE7', time: '09:20 AM' },
+  { id: '3', name: 'Nguyễn Văn An', initials: null, avatar: 'https://www.figma.com/api/mcp/asset/73a3eaa9-8ed5-409f-8335-6eaa55cf1124', score: 7.5, grade: 'Khá', gradeColor: '#16A34A', bgColor: '#F0FDF4', time: '10:05 AM' },
+  { id: '4', name: 'Trần Hùng', initials: 'TH', avatar: null, score: 4.5, grade: 'Yếu', gradeColor: '#EF4444', bgColor: '#FEF2F2', time: '10:45 AM' },
+  { id: '5', name: 'Phạm Văn Cường', initials: null, avatar: 'https://www.figma.com/api/mcp/asset/af50f0e6-786a-4341-a183-f85bc123b9f6', score: 3.0, grade: 'Kém', gradeColor: '#DC2626', bgColor: '#FEE2E2', time: '11:00 AM' },
 ];
 
-const CLASS_STATS = [
-  { name: '10A1', avgScore: 8.2, completion: '92%', exams: 5 },
-  { name: '11B2', avgScore: 7.5, completion: '85%', exams: 3 },
-  { name: '12C1', avgScore: 7.9, completion: '88%', exams: 4 },
-  { name: '10A2', avgScore: 6.8, completion: '75%', exams: 2 },
+// Score distribution bars — max height 192px
+const SCORE_DIST = [
+  { range: '0-2', count: 2, maxCount: 28, color: '#F0FDF4' },
+  { range: '2-4', count: 8, maxCount: 28, color: '#DCFCE7' },
+  { range: '4-6', count: 15, maxCount: 28, color: '#86EFAC' },
+  { range: '6-8', count: 28, maxCount: 28, color: Colors.primary },
+  { range: '8-10', count: 12, maxCount: 28, color: '#4ADE80' },
 ];
 
 export const ThongKeScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" size={20} color={Colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Thống kê & Phân tích</Text>
-          <View style={{ width: 24 }} />
+          <Text style={styles.headerTitle}>Thống kê lớp 6A1</Text>
+        </View>
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.iconBtn}>
+            <Ionicons name="filter-outline" size={20} color={Colors.textPrimary} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconBtn}>
+            <Ionicons name="ellipsis-horizontal" size={20} color={Colors.textPrimary} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Stats Row */}
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <View style={styles.statIconWrap}>
+              <View style={[styles.statCircle, { backgroundColor: Colors.primaryLight }]} />
+            </View>
+            <Text style={styles.statLabel}>Trung bình</Text>
+            <Text style={styles.statValue}>7.8</Text>
+          </View>
+          <View style={styles.statCard}>
+            <View style={styles.statIconWrap}>
+              <View style={[styles.statCircle, { backgroundColor: Colors.primaryLight }]} />
+            </View>
+            <Text style={styles.statLabel}>Tỉ lệ đạt</Text>
+            <Text style={styles.statValue}>85%</Text>
+          </View>
         </View>
 
-        <View style={styles.content}>
-          {/* Overview stats */}
-          <View style={styles.statsGrid}>
-            {STATS.map((stat, i) => (
-              <View key={i} style={styles.statCard}>
-                <View style={[styles.statIcon, { backgroundColor: stat.color + '20' }]}>
-                  <Ionicons name={stat.icon} size={20} color={stat.color} />
+        {/* Score Distribution Chart */}
+        <View style={styles.chartCard}>
+          <View style={styles.chartHeader}>
+            <Text style={styles.chartTitle}>Phân phối điểm số</Text>
+            <TouchableOpacity style={styles.detailBtn}>
+              <Text style={styles.detailBtnText}>Chi tiết</Text>
+              <Ionicons name="chevron-forward" size={14} color={Colors.primary} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Bar Chart */}
+          <View style={styles.barChart}>
+            {SCORE_DIST.map((bar, i) => (
+              <View key={i} style={styles.barCol}>
+                <View style={styles.barWrap}>
+                  <View
+                    style={[
+                      styles.bar,
+                      {
+                        backgroundColor: bar.color,
+                        height: Math.round((bar.count / bar.maxCount) * 192),
+                      },
+                    ]}
+                  />
                 </View>
-                <Text style={styles.statValue}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
+                <Text style={[styles.barLabel, i === 3 && styles.barLabelActive]}>
+                  {bar.range}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Student List */}
+        <View style={styles.listSection}>
+          <View style={styles.listHeader}>
+            <Text style={styles.listTitle}>Danh sách học sinh</Text>
+            <TouchableOpacity style={styles.sortBtn}>
+              <Ionicons name="swap-vertical" size={14} color="#475569" />
+              <Text style={styles.sortBtnText}>Điểm cao nhất</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.studentCard}>
+            {STUDENTS.map((student, i) => (
+              <View key={student.id}>
+                {i > 0 && <View style={styles.studentDivider} />}
+                <View style={styles.studentRow}>
+                  <View style={styles.studentLeft}>
+                    {student.avatar ? (
+                      <Image source={{ uri: student.avatar }} style={styles.studentAvatar} />
+                    ) : (
+                      <View style={[styles.studentAvatarInit, { backgroundColor: student.bgColor }]}>
+                        <Text style={[styles.studentInitials, { color: student.gradeColor }]}>
+                          {student.initials}
+                        </Text>
+                      </View>
+                    )}
+                    <View style={styles.studentInfo}>
+                      <Text style={styles.studentName}>{student.name}</Text>
+                      <View style={styles.studentTimeRow}>
+                        <Ionicons name="time-outline" size={11.7} color={Colors.textSecondary} />
+                        <Text style={styles.studentTime}>{student.time}</Text>
+                      </View>
+                    </View>
+                  </View>
+                  <View style={styles.scoreWrap}>
+                    <View style={[styles.scoreBadge, { backgroundColor: student.bgColor }]}>
+                      <Text style={[styles.scoreValue, { color: '#15803D' }]}>
+                        {student.score}
+                      </Text>
+                    </View>
+                    <Text style={[styles.gradeLabel, { color: student.gradeColor }]}>
+                      {student.grade}
+                    </Text>
+                  </View>
+                </View>
               </View>
             ))}
           </View>
 
-          {/* Score distribution */}
-          <Card style={styles.chartCard}>
-            <Text style={styles.cardTitle}>Phân bố điểm</Text>
-            <View style={styles.barChart}>
-              {[
-                { range: '0-4', value: 0.05, color: Colors.error },
-                { range: '5-6', value: 0.15, color: Colors.warning },
-                { range: '7-8', value: 0.40, color: Colors.info },
-                { range: '9-10', value: 0.40, color: Colors.success },
-              ].map((bar, i) => (
-                <View key={i} style={styles.barRow}>
-                  <Text style={styles.barLabel}>{bar.range}</Text>
-                  <View style={styles.barTrack}>
-                    <View style={[styles.barFill, { width: `${bar.value * 100}%`, backgroundColor: bar.color }]} />
-                  </View>
-                  <Text style={styles.barPct}>{Math.round(bar.value * 100)}%</Text>
-                </View>
-              ))}
-            </View>
-          </Card>
-
-          {/* Class breakdown */}
-          <Text style={styles.sectionTitle}>Theo lớp học</Text>
-          {CLASS_STATS.map((cls, i) => (
-            <Card key={i} style={styles.classCard}>
-              <View style={styles.classHeader}>
-                <Text style={styles.className}>{cls.name}</Text>
-                <View style={styles.classBadge}>
-                  <Text style={styles.classBadgeText}>{cls.completion} hoàn thành</Text>
-                </View>
-              </View>
-              <View style={styles.classStats}>
-                <View style={styles.classStat}>
-                  <Text style={styles.classStatValue}>{cls.avgScore}</Text>
-                  <Text style={styles.classStatLabel}>Điểm TB</Text>
-                </View>
-                <View style={styles.classStat}>
-                  <Text style={styles.classStatValue}>{cls.exams}</Text>
-                  <Text style={styles.classStatLabel}>Đề thi</Text>
-                </View>
-                <TouchableOpacity style={styles.viewBtn}>
-                  <Text style={styles.viewBtnText}>Xem chi tiết</Text>
-                </TouchableOpacity>
-              </View>
-            </Card>
-          ))}
+          {/* View all */}
+          <TouchableOpacity style={styles.viewAllBtn}>
+            <Text style={styles.viewAllText}>Xem tất cả 45 học sinh</Text>
+            <Ionicons name="chevron-down" size={16} color={Colors.textSecondary} />
+          </TouchableOpacity>
         </View>
+
         <View style={{ height: 120 }} />
       </ScrollView>
+
+      {/* Export FAB */}
+      <TouchableOpacity style={styles.exportFab}>
+        <Ionicons name="download-outline" size={16} color={Colors.white} />
+        <Text style={styles.exportFabText}>Xuất báo cáo</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -114,43 +175,199 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: Colors.white,
+    backgroundColor: 'rgba(255,255,255,0.9)',
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray20,
+    borderBottomColor: Colors.borderLight,
   },
-  headerTitle: { fontSize: 17, fontWeight: '600', color: Colors.textPrimary },
-  content: { padding: 20 },
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  backBtn: { padding: 4 },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  iconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.gray10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    gap: 16,
+  },
   statCard: {
-    width: '47%',
+    flex: 1,
     backgroundColor: Colors.white,
     borderRadius: 16,
-    padding: 16,
+    padding: 21,
     borderWidth: 1,
-    borderColor: Colors.gray20,
+    borderColor: Colors.borderLight,
+    shadowColor: 'rgba(0,0,0,0.05)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  statIconWrap: { marginBottom: 4 },
+  statCircle: { width: 40, height: 40, borderRadius: 20 },
+  statLabel: { fontSize: 14, fontWeight: '500', color: Colors.textSecondary, marginBottom: 12 },
+  statValue: { fontSize: 30, fontWeight: '700', color: Colors.textPrimary },
+  chartCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    padding: 21,
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    shadowColor: 'rgba(0,0,0,0.05)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  chartTitle: { fontSize: 16, fontWeight: '700', color: Colors.textPrimary },
+  detailBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primaryLight,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    gap: 4,
+  },
+  detailBtnText: { fontSize: 12, fontWeight: '600', color: Colors.primary },
+  barChart: {
+    flexDirection: 'row',
+    height: 192,
+    gap: 12,
+  },
+  barCol: {
+    flex: 1,
     alignItems: 'center',
   },
-  statIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
-  statValue: { fontSize: 22, fontWeight: '700', color: Colors.textPrimary },
-  statLabel: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
-  chartCard: { marginTop: 20 },
-  cardTitle: { fontSize: 16, fontWeight: '600', color: Colors.textPrimary, marginBottom: 16 },
-  barChart: {},
-  barRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  barLabel: { fontSize: 12, color: Colors.textSecondary, width: 36 },
-  barTrack: { flex: 1, height: 12, backgroundColor: Colors.gray20, borderRadius: 6, marginHorizontal: 8 },
-  barFill: { height: '100%', borderRadius: 6 },
-  barPct: { fontSize: 12, fontWeight: '600', color: Colors.textPrimary, width: 32, textAlign: 'right' },
-  sectionTitle: { fontSize: 16, fontWeight: '600', color: Colors.textPrimary, marginTop: 24, marginBottom: 12 },
-  classCard: { marginBottom: 12 },
-  classHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  className: { fontSize: 16, fontWeight: '600', color: Colors.textPrimary },
-  classBadge: { backgroundColor: Colors.primaryLight, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
-  classBadgeText: { fontSize: 12, color: Colors.primary, fontWeight: '500' },
-  classStats: { flexDirection: 'row', alignItems: 'center' },
-  classStat: { marginRight: 24 },
-  classStatValue: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
-  classStatLabel: { fontSize: 11, color: Colors.textSecondary },
-  viewBtn: { marginLeft: 'auto', paddingVertical: 6, paddingHorizontal: 14, borderRadius: 20, borderWidth: 1, borderColor: Colors.primary },
-  viewBtnText: { fontSize: 12, color: Colors.primary, fontWeight: '600' },
+  barWrap: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    width: '100%',
+  },
+  bar: {
+    width: '100%',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    minHeight: 4,
+  },
+  barLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: Colors.textMuted,
+    marginTop: 8,
+  },
+  barLabelActive: { color: '#16A34A' },
+  listSection: {
+    paddingHorizontal: 16,
+    paddingTop: 24,
+  },
+  listHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  listTitle: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
+  sortBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: Colors.white,
+    paddingHorizontal: 13,
+    paddingVertical: 7,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  sortBtnText: { fontSize: 12, fontWeight: '600', color: '#475569' },
+  studentCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    shadowColor: 'rgba(0,0,0,0.05)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  studentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+  },
+  studentLeft: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  studentAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  studentAvatarInit: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  studentInitials: { fontSize: 14, fontWeight: '700' },
+  studentInfo: {},
+  studentName: { fontSize: 14, fontWeight: '700', color: Colors.textPrimary },
+  studentTimeRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+  studentTime: { fontSize: 12, color: Colors.textSecondary },
+  studentDivider: { height: 1, backgroundColor: '#F8FAFC', marginLeft: 80 },
+  scoreWrap: { alignItems: 'flex-end', gap: 4 },
+  scoreBadge: {
+    height: 36,
+    minWidth: 56,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  scoreValue: { fontSize: 16, fontWeight: '700' },
+  gradeLabel: { fontSize: 10, fontWeight: '500' },
+  viewAllBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 4,
+  },
+  viewAllText: { fontSize: 14, fontWeight: '600', color: Colors.textSecondary },
+  exportFab: {
+    position: 'absolute',
+    bottom: 100,
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 999,
+    shadowColor: 'rgba(34,197,94,0.3)',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 1,
+    shadowRadius: 25,
+    elevation: 8,
+  },
+  exportFabText: { fontSize: 14, fontWeight: '700', color: Colors.white },
 });

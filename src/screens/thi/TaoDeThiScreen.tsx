@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
-import { Button, InputField, Chip } from '../../components';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { DashboardStackParamList } from '../../types';
 
@@ -11,104 +10,124 @@ interface Props {
   navigation: NativeStackNavigationProp<DashboardStackParamList>;
 }
 
-const SUBJECTS = ['Toán', 'Vật lý', 'Hóa học', 'Ngữ văn', 'Sinh học', 'Lịch sử', 'Địa lý', 'Tiếng Anh'];
-const GRADES = ['Lớp 6', 'Lớp 7', 'Lớp 8', 'Lớp 9', 'Lớp 10', 'Lớp 11', 'Lớp 12'];
+const SUBJECTS = [
+  { label: 'Toán', selected: true },
+  { label: 'Tiếng Anh', selected: false },
+  { label: 'Lịch sử', selected: false },
+  { label: 'Địa lý', selected: false },
+  { label: 'Ngữ văn', selected: false },
+  { label: 'Hóa học', selected: false },
+  { label: 'Vật lý', selected: false },
+];
 
 export const TaoDeThiScreen: React.FC<Props> = ({ navigation }) => {
   const [title, setTitle] = useState('');
-  const [subject, setSubject] = useState('');
-  const [grade, setGrade] = useState('');
-  const [duration, setDuration] = useState('60');
+  const [subjects, setSubjects] = useState(SUBJECTS);
+  const [duration, setDuration] = useState('45');
 
-  const handleCreate = () => {
-    if (!title || !subject || !grade) {
-      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
-      return;
-    }
-    navigation.navigate('SoanThaoCauHoi', { examId: 'new' });
+  const toggleSubject = (idx: number) => {
+    setSubjects(subjects.map((s, i) => ({ ...s, selected: i === idx })));
   };
+
+  const incDuration = () => setDuration(String(parseInt(duration || '0') + 15));
+  const decDuration = () => setDuration(String(Math.max(15, parseInt(duration || '0') - 15)));
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
-          </TouchableOpacity>
-          <Text style={styles.title}>Tạo đề thi</Text>
-          <View style={{ width: 24 }} />
-        </View>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={18} color={Colors.textPrimary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Tạo đề thi mới</Text>
+        <TouchableOpacity><Text style={styles.saveDraft}>Lưu nháp</Text></TouchableOpacity>
+      </View>
 
-        {/* Methods */}
-        <View style={styles.methodsRow}>
-          <TouchableOpacity style={[styles.methodCard, styles.methodActive]}>
-            <Ionicons name="create-outline" size={28} color={Colors.primary} />
-            <Text style={[styles.methodLabel, { color: Colors.primary }]}>Tạo thủ công</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.methodCard}
-            onPress={() => navigation.navigate('AIGenerator')}
-          >
-            <Ionicons name="sparkles-outline" size={28} color={Colors.gray50} />
-            <Text style={styles.methodLabel}>Dùng AI</Text>
-          </TouchableOpacity>
+      {/* Wizard step 1 */}
+      <View style={styles.wizardWrap}>
+        <View style={styles.wizardLeft}>
+          <View style={styles.stepCircleActive}>
+            <Text style={styles.stepNum}>1</Text>
+          </View>
+          <Text style={styles.stepLabelActive}>Thông tin</Text>
         </View>
+        <View style={styles.wizardLine} />
+        <View style={styles.wizardRight}>
+          <View style={styles.stepCirclePending}>
+            <Text style={styles.stepNumPending}>2</Text>
+          </View>
+          <Text style={styles.stepLabelPending}>Câu hỏi</Text>
+        </View>
+        <View style={styles.wizardLine} />
+        <View style={styles.wizardRight}>
+          <View style={styles.stepCirclePending}>
+            <Text style={styles.stepNumPending}>3</Text>
+          </View>
+          <Text style={styles.stepLabelPending}>Cài đặt</Text>
+        </View>
+      </View>
 
-        {/* Form */}
-        <View style={styles.form}>
-          <InputField
-            label="Tên đề thi"
-            placeholder="VD: Toán học - Học kì I"
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        {/* Exam name card */}
+        <View style={styles.examNameCard}>
+          <View style={styles.examNameHeader}>
+            <Text style={styles.examNameLabel}>TÊN ĐỀ THI</Text>
+            <TouchableOpacity>
+              <Ionicons name="pencil-outline" size={16} color="#64748B" />
+            </TouchableOpacity>
+          </View>
+          <TextInput
+            style={styles.examNameInput}
+            placeholder="Nhập tên đề thi..."
+            placeholderTextColor="#B7B7B7"
             value={title}
             onChangeText={setTitle}
           />
-
-          {/* Subject */}
-          <Text style={styles.fieldLabel}>Môn học</Text>
-          <View style={styles.chipRow}>
-            {SUBJECTS.map((s) => (
-              <Chip
-                key={s}
-                label={s}
-                active={subject === s}
-                color={Colors.primary}
-                onPress={() => setSubject(s)}
-                style={{ marginBottom: 8 }}
-              />
-            ))}
-          </View>
-
-          {/* Grade */}
-          <Text style={styles.fieldLabel}>Khối lớp</Text>
-          <View style={styles.chipRow}>
-            {GRADES.map((g) => (
-              <Chip
-                key={g}
-                label={g}
-                active={grade === g}
-                color={Colors.primary}
-                onPress={() => setGrade(g)}
-                style={{ marginBottom: 8 }}
-              />
-            ))}
-          </View>
-
-          <InputField
-            label="Thời gian làm bài (phút)"
-            placeholder="60"
-            value={duration}
-            onChangeText={setDuration}
-            keyboardType="numeric"
-          />
-
-          <Button
-            title="Tiếp tục tạo câu hỏi"
-            onPress={handleCreate}
-            fullWidth
-          />
         </View>
-        <View style={{ height: 120 }} />
+
+        {/* Subject pills */}
+        <View style={styles.section}>
+          <Text style={styles.fieldLabel}>MÔN HỌC</Text>
+          <View style={styles.pillRow}>
+            {subjects.map((s, i) => (
+              <TouchableOpacity
+                key={s.label}
+                style={[styles.pill, s.selected ? styles.pillActive : styles.pillInactive]}
+                onPress={() => toggleSubject(i)}
+              >
+                <Text style={[styles.pillText, s.selected ? styles.pillTextActive : styles.pillTextInactive]}>
+                  {s.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Duration */}
+        <View style={styles.section}>
+          <Text style={styles.fieldLabel}>THỜI GIAN LÀM BÀI</Text>
+          <View style={styles.durationRow}>
+            <TouchableOpacity style={styles.durationBtn} onPress={decDuration}>
+              <Ionicons name="remove" size={16} color={Colors.textPrimary} />
+            </TouchableOpacity>
+            <View style={styles.durationValue}>
+              <Text style={styles.durationNum}>{duration}</Text>
+              <Text style={styles.durationUnit}> phút</Text>
+            </View>
+            <TouchableOpacity style={styles.durationBtn} onPress={incDuration}>
+              <Ionicons name="add" size={16} color={Colors.textPrimary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Continue button */}
+        <TouchableOpacity
+          style={styles.continueBtn}
+          onPress={() => navigation.navigate('SoanThaoCauHoi', { examId: 'new' })}
+        >
+          <Text style={styles.continueBtnText}>Tiếp tục tạo câu hỏi</Text>
+          <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -122,24 +141,141 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  backBtn: { padding: 4 },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
+  saveDraft: { fontSize: 14, fontWeight: '600', color: Colors.primary },
+  wizardWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray20,
+    borderBottomColor: Colors.borderLight,
   },
-  title: { fontSize: 17, fontWeight: '600', color: Colors.textPrimary },
-  methodsRow: { flexDirection: 'row', padding: 20, gap: 12 },
-  methodCard: {
-    flex: 1,
-    backgroundColor: Colors.white,
+  wizardLeft: { alignItems: 'center' },
+  wizardRight: { alignItems: 'center' },
+  stepCircleActive: {
+    width: 32,
+    height: 32,
     borderRadius: 16,
-    padding: 16,
+    backgroundColor: Colors.primary,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: Colors.gray20,
+    justifyContent: 'center',
+    borderWidth: 4,
+    borderColor: 'rgba(33,196,93,0.15)',
   },
-  methodActive: { borderColor: Colors.primary },
-  methodLabel: { fontSize: 13, fontWeight: '600', color: Colors.textSecondary, marginTop: 8 },
-  form: { paddingHorizontal: 20 },
-  fieldLabel: { fontSize: 14, fontWeight: '500', color: Colors.textPrimary, marginBottom: 8, marginTop: 8 },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
+  stepCirclePending: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.gray20,
+    borderWidth: 1,
+    borderColor: Colors.gray30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepNum: { color: Colors.white, fontSize: 14, fontWeight: '700' },
+  stepNumPending: { color: Colors.textMuted, fontSize: 14, fontWeight: '700' },
+  stepLabelActive: { fontSize: 10, fontWeight: '700', color: Colors.primary, marginTop: 4 },
+  stepLabelPending: { fontSize: 10, fontWeight: '500', color: Colors.textMuted, marginTop: 4 },
+  wizardLine: { width: 60, height: 2, backgroundColor: Colors.gray20, marginHorizontal: 8 },
+  scroll: { padding: 16, paddingBottom: 120 },
+  examNameCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    padding: 17,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  examNameHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  examNameLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.textSecondary,
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+  },
+  examNameInput: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    padding: 0,
+  },
+  section: { marginBottom: 20 },
+  fieldLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.textSecondary,
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+    marginBottom: 12,
+  },
+  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  pill: {
+    height: 40,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pillInactive: {
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: '#DBDBDB',
+  },
+  pillActive: {
+    backgroundColor: Colors.white,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  pillText: { fontSize: 14 },
+  pillTextInactive: { fontWeight: '500', color: '#8C95A1' },
+  pillTextActive: { fontWeight: '700', color: Colors.primary },
+  durationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.gray20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  durationBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: Colors.gray10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  durationValue: { flex: 1, alignItems: 'center', flexDirection: 'row', justifyContent: 'center' },
+  durationNum: { fontSize: 24, fontWeight: '700', color: Colors.textPrimary },
+  durationUnit: { fontSize: 14, fontWeight: '500', color: Colors.textSecondary },
+  continueBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: Colors.primary,
+    height: 52,
+    borderRadius: 24,
+    shadowColor: 'rgba(33,196,93,0.3)',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 1,
+    shadowRadius: 15,
+    elevation: 4,
+  },
+  continueBtnText: { fontSize: 16, fontWeight: '700', color: Colors.white },
 });

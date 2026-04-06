@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
-import { Avatar, Card, Chip } from '../../components';
+import { Avatar } from '../../components';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { DashboardStackParamList } from '../../types';
 
@@ -14,14 +14,14 @@ interface Props {
 export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Avatar name="Giáo Viên" size={48} />
-            <View style={{ marginLeft: 12 }}>
-              <Text style={styles.greeting}>Xin chào! 👋</Text>
-              <Text style={styles.userName}>Nguyễn Văn A</Text>
+            <Avatar name="Thầy Nam" size={48} />
+            <View style={styles.headerText}>
+              <Text style={styles.greeting}>Xin chào,</Text>
+              <Text style={styles.userName}>Thầy Nam</Text>
             </View>
           </View>
           <View style={styles.headerRight}>
@@ -34,86 +34,128 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         </View>
 
+        {/* Banner Card */}
+        <View style={styles.bannerCard}>
+          <View style={styles.bannerContent}>
+            <Text style={styles.bannerTitle}>Tạo đề thi mới</Text>
+            <Text style={styles.bannerSub}>Sử dụng AI để tạo đề thi trong 30s</Text>
+            <TouchableOpacity
+              style={styles.bannerBtn}
+              onPress={() => navigation.navigate('AIGenerator')}
+            >
+              <Ionicons name="bulb-outline" size={20} color={Colors.white} />
+              <Text style={styles.bannerBtnText}>Bắt đầu ngay</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.bannerIcon}>
+            <Ionicons name="sparkles" size={56} color={Colors.white} />
+          </View>
+        </View>
+
         {/* Stats Row */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statsRow}>
+        <View style={styles.statsRow}>
           {[
-            { label: 'Đề thi', value: '12', icon: 'document-text-outline' as const, color: Colors.primary },
-            { label: 'Lớp học', value: '5', icon: 'people-outline' as const, color: Colors.info },
-            { label: 'Học sinh', value: '148', icon: 'school-outline' as const, color: Colors.warning },
-            { label: 'Hoàn thành', value: '89%', icon: 'checkmark-circle-outline' as const, color: Colors.success },
+            { label: 'Tổng đề thi', value: '24', color: Colors.primary },
+            { label: 'Đang mở', value: '06', color: Colors.info },
+            { label: 'Lượt làm bài', value: '160', color: Colors.warning },
           ].map((stat, i) => (
             <View key={i} style={styles.statCard}>
-              <View style={[styles.statIconWrap, { backgroundColor: stat.color + '20' }]}>
-                <Ionicons name={stat.icon} size={20} color={stat.color} />
+              <View style={styles.statIconWrap}>
+                <View style={[styles.statCircle, { backgroundColor: stat.color + '20' }]} />
               </View>
               <Text style={styles.statValue}>{stat.value}</Text>
               <Text style={styles.statLabel}>{stat.label}</Text>
             </View>
           ))}
-        </ScrollView>
-
-        {/* Quick Actions */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Thao tác nhanh</Text>
         </View>
-        <View style={styles.quickActions}>
-          {[
-            { label: 'Tạo đề thi', icon: 'add-outline' as const, bg: Colors.primaryLight, color: Colors.primary, onPress: () => navigation.navigate('TaoDeThi') },
-            { label: 'Kho đề', icon: 'library-outline' as const, bg: '#DBEAFE', color: Colors.info, onPress: () => navigation.navigate('KhoDeDetail', { tab: 'open' }) },
-            { label: 'AI Generator', icon: 'sparkles-outline' as const, bg: '#FEF3C7', color: Colors.warning, onPress: () => navigation.navigate('AIGenerator') },
-            { label: 'Thống kê', icon: 'bar-chart-outline' as const, bg: '#EDE9FE', color: '#7C3AED', onPress: () => navigation.navigate('ThongKe') },
-          ].map((action, i) => (
-            <TouchableOpacity key={i} style={styles.quickAction} onPress={action.onPress}>
-              <View style={[styles.quickActionIcon, { backgroundColor: action.bg }]}>
-                <Ionicons name={action.icon} size={24} color={action.color} />
-              </View>
-              <Text style={styles.quickActionLabel}>{action.label}</Text>
+
+        {/* Class Performance */}
+        <View style={styles.perfCard}>
+          <View style={styles.perfHeader}>
+            <Text style={styles.perfTitle}>Hiệu suất lớp học</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('ThongKe')}>
+              <Text style={styles.perfDetail}>Chi tiết</Text>
             </TouchableOpacity>
+          </View>
+          <View style={styles.perfBody}>
+            <View style={styles.perfLeft}>
+              <View style={styles.passCircle}>
+                <Text style={styles.passPercent}>80%</Text>
+              </View>
+              <Text style={styles.passLabel}>PASS RATE</Text>
+            </View>
+            <View style={styles.perfRight}>
+              {[
+                { color: Colors.success, label: 'Đạt (Pass)', value: '128' },
+                { color: Colors.gray50, label: 'Chưa đạt', value: '32' },
+              ].map((item, i) => (
+                <View key={i} style={styles.perfRow}>
+                  <View style={[styles.perfDot, { backgroundColor: item.color }]} />
+                  <Text style={styles.perfRowLabel}>{item.label}</Text>
+                  <Text style={styles.perfRowValue}>{item.value}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+
+        {/* Recent Activity */}
+        <View style={styles.activitySection}>
+          <View style={styles.activityHeader}>
+            <Text style={styles.activityTitle}>Hoạt động gần đây</Text>
+            <TouchableOpacity>
+              <Text style={styles.seeAll}>Xem tất cả</Text>
+            </TouchableOpacity>
+          </View>
+
+          {[
+            {
+              avatar: 'NV',
+              name: 'Nguyễn Văn A',
+              action: 'vừa nộp bài "Kiểm tra 15 phút"',
+              time: '2 phút trước',
+              icon: 'checkmark-circle',
+              iconColor: Colors.success,
+              bg: Colors.successBg,
+            },
+            {
+              avatar: 'AI',
+              name: 'Đề thi',
+              action: 'Toán Chương 1 đã được tạo thành công',
+              time: '15 phút trước',
+              icon: 'bulb',
+              iconColor: Colors.warning,
+              bg: Colors.warningBg,
+            },
+            {
+              avatar: '+3',
+              name: '3 học sinh mới',
+              action: 'đã tham gia lớp 12A1',
+              time: '15 phút trước',
+              icon: 'people',
+              iconColor: Colors.primary,
+              bg: Colors.primaryBg,
+            },
+          ].map((item, i) => (
+            <View key={i} style={styles.activityCard}>
+              <View style={styles.activityAvatarWrap}>
+                <View style={styles.activityAvatar}>
+                  <Text style={styles.activityAvatarText}>{item.avatar}</Text>
+                </View>
+                <View style={[styles.activityIconBadge, { backgroundColor: item.bg }]}>
+                  <Ionicons name={item.icon as any} size={16} color={item.iconColor} />
+                </View>
+              </View>
+              <View style={styles.activityText}>
+                <Text style={styles.activityName}>{item.name}</Text>
+                <Text style={styles.activityAction}>{item.action}</Text>
+                <Text style={styles.activityTime}>{item.time}</Text>
+              </View>
+            </View>
           ))}
         </View>
 
-        {/* Recent Exams */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Đề thi gần đây</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('KhoDeDetail', { tab: 'open' })}>
-            <Text style={styles.seeAll}>Xem tất cả</Text>
-          </TouchableOpacity>
-        </View>
-
-        {[
-          { id: '1', title: 'Toán học - HKI', subject: 'Toán', grade: 'Lớp 10', status: 'open', questions: 20, time: '60 phút' },
-          { id: '2', title: 'Vật lý - HKII', subject: 'Vật lý', grade: 'Lớp 11', status: 'draft', questions: 15, time: '45 phút' },
-          { id: '3', title: 'Hóa học - HKI', subject: 'Hóa', grade: 'Lớp 12', status: 'closed', questions: 25, time: '90 phút' },
-        ].map((exam) => (
-          <Card key={exam.id} style={styles.examCard} onPress={() => navigation.navigate('KhoDeDetail', { tab: exam.status as any })}>
-            <View style={styles.examHeader}>
-              <View>
-                <Text style={styles.examTitle}>{exam.title}</Text>
-                <Text style={styles.examMeta}>{exam.subject} · {exam.grade}</Text>
-              </View>
-              <Chip
-                label={exam.status === 'open' ? 'Đang mở' : exam.status === 'draft' ? 'Bản nháp' : 'Đã đóng'}
-                color={exam.status === 'open' ? Colors.success : exam.status === 'draft' ? Colors.warning : Colors.gray50}
-                active
-              />
-            </View>
-            <View style={styles.examFooter}>
-              <View style={styles.examMetaRow}>
-                <Ionicons name="help-circle-outline" size={14} color={Colors.gray50} />
-                <Text style={styles.examMetaText}>{exam.questions} câu</Text>
-              </View>
-              <View style={styles.examMetaRow}>
-                <Ionicons name="time-outline" size={14} color={Colors.gray50} />
-                <Text style={styles.examMetaText}>{exam.time}</Text>
-              </View>
-              <TouchableOpacity onPress={() => navigation.navigate('PhatDe', { examId: exam.id })}>
-                <Ionicons name="share-outline" size={20} color={Colors.primary} />
-              </TouchableOpacity>
-            </View>
-          </Card>
-        ))}
-
-        <View style={{ height: 100 }} />
+        <View style={{ height: 120 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -121,72 +163,142 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.screenBg },
-  scroll: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingTop: 12,
     paddingBottom: 16,
-  },
-  headerLeft: { flexDirection: 'row', alignItems: 'center' },
-  headerRight: { flexDirection: 'row', alignItems: 'center' },
-  greeting: { fontSize: 13, color: Colors.textSecondary },
-  userName: { fontSize: 16, fontWeight: '700', color: Colors.textPrimary },
-  iconBtn: { padding: 8, marginLeft: 4 },
-  statsRow: { paddingHorizontal: 12, marginBottom: 8 },
-  statCard: {
     backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 8,
-    alignItems: 'center',
-    width: 100,
-    borderWidth: 1,
-    borderColor: Colors.gray20,
   },
-  statIconWrap: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
-  statValue: { fontSize: 20, fontWeight: '700', color: Colors.textPrimary },
-  statLabel: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
-  sectionHeader: {
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  headerText: {},
+  greeting: { fontSize: 13, color: Colors.textSecondary, fontWeight: '500' },
+  userName: { fontSize: 17, fontWeight: '700', color: Colors.textPrimary },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  iconBtn: { padding: 8 },
+  bannerCard: {
+    marginHorizontal: 16,
+    marginTop: 16,
+    backgroundColor: Colors.primary,
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: 'row',
+    overflow: 'hidden',
+  },
+  bannerContent: { flex: 1 },
+  bannerTitle: { fontSize: 18, fontWeight: '700', color: Colors.white, marginBottom: 4 },
+  bannerSub: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginBottom: 12 },
+  bannerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  bannerBtnText: { fontSize: 13, fontWeight: '600', color: Colors.white },
+  bannerIcon: { alignSelf: 'flex-end', opacity: 0.3 },
+  statsRow: {
+    flexDirection: 'row',
+    marginHorizontal: 16,
+    marginTop: 16,
+    gap: 10,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+  },
+  statIconWrap: { marginBottom: 8 },
+  statCircle: { width: 36, height: 36, borderRadius: 18 },
+  statValue: { fontSize: 22, fontWeight: '700', color: Colors.textPrimary, marginBottom: 2 },
+  statLabel: { fontSize: 11, color: Colors.textSecondary, fontWeight: '500' },
+  perfCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginTop: 16,
+    padding: 16,
+  },
+  perfHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    marginTop: 24,
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: Colors.textPrimary },
-  seeAll: { fontSize: 14, color: Colors.primary, fontWeight: '500' },
-  quickActions: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    gap: 12,
-  },
-  quickAction: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    paddingVertical: 16,
-    borderWidth: 1,
-    borderColor: Colors.gray20,
-  },
-  quickActionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+  perfTitle: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
+  perfDetail: { fontSize: 12, color: Colors.primary, fontWeight: '600' },
+  perfBody: { flexDirection: 'row', alignItems: 'center' },
+  perfLeft: { alignItems: 'center', marginRight: 24 },
+  passCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 8,
+    borderColor: Colors.success,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  quickActionLabel: { fontSize: 12, fontWeight: '600', color: Colors.textPrimary, textAlign: 'center' },
-  examCard: { marginHorizontal: 20, marginBottom: 12 },
-  examHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
-  examTitle: { fontSize: 15, fontWeight: '600', color: Colors.textPrimary },
-  examMeta: { fontSize: 13, color: Colors.textSecondary, marginTop: 2 },
-  examFooter: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  examMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  examMetaText: { fontSize: 12, color: Colors.gray50 },
+  passPercent: { fontSize: 22, fontWeight: '700', color: Colors.textPrimary },
+  passLabel: { fontSize: 10, color: Colors.textSecondary, fontWeight: '600', letterSpacing: 1 },
+  perfRight: { flex: 1 },
+  perfRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  perfDot: { width: 10, height: 10, borderRadius: 5, marginRight: 8 },
+  perfRowLabel: { flex: 1, fontSize: 13, color: Colors.textSecondary },
+  perfRowValue: { fontSize: 13, fontWeight: '700', color: Colors.textPrimary },
+  activitySection: { marginTop: 20, paddingHorizontal: 16 },
+  activityHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  activityTitle: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
+  seeAll: { fontSize: 12, color: Colors.primary, fontWeight: '600' },
+  activityCard: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+  },
+  activityAvatarWrap: { marginRight: 12, position: 'relative' },
+  activityAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.gray20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activityAvatarText: { fontSize: 13, fontWeight: '700', color: Colors.textSecondary },
+  activityIconBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: Colors.white,
+  },
+  activityText: { flex: 1 },
+  activityName: { fontSize: 13, fontWeight: '600', color: Colors.textPrimary, marginBottom: 2 },
+  activityAction: { fontSize: 13, color: Colors.textPrimary, marginBottom: 2 },
+  activityTime: { fontSize: 11, color: Colors.textMuted },
 });

@@ -84,6 +84,7 @@ FlazersApp/
 │   │   ├── Button.tsx             # Primary/secondary/outline button
 │   │   ├── Card.tsx               # Container card with elevation
 │   │   ├── Chip.tsx               # Filter/status chip
+│   │   ├── DeleteConfirmDialog.tsx  # Reusable delete confirmation modal
 │   │   ├── Header.tsx             # Screen header with back/action
 │   │   ├── Icon.tsx               # Typed icon wrapper
 │   │   ├── InputField.tsx         # Text input with label/error
@@ -146,13 +147,16 @@ Derived directly from the Figma prototype (`sSVF9eIvhSd0Xuaw7vZqTx`).
 ## 🧭 Navigation Architecture
 
 ```
-RootNavigator
+RootNavigator (native-stack)
+├── SplashScreen              (auto-transitions to Onboarding after 3s)
 ├── OnboardingScreen         (3-step carousel)
 ├── Auth (stack)
-│   ├── LoginScreen          ← demo credentials here
-│   ├── RegisterScreen
-│   └── ForgotPasswordScreen
-└── MainTabs (bottom tab navigator)
+│   └── AuthNavigator
+│       ├── LoginScreen      ← demo credentials here
+│       ├── RegisterScreen
+│       └── ForgotPasswordScreen
+└── DashboardStackNavigator (stack)
+     └── MainTabNavigator (bottom-tabs)
     ├── DashboardTab → DashboardScreen
     │                → KhoDeDetailScreen
     │                → TaoDeThiScreen
@@ -249,9 +253,19 @@ style={[styles.base, condition && styles.active]}
 style={condition ? styles.active : styles.base}
 ```
 
-### Navigation: `"Login" was not handled`
-**Cause:** Screen is inside a nested navigator, not at the Root level.
-**Fix:** Use `useNavigation()` + `CommonActions.reset()` from the parent navigator.
+### `Cannot read property 'reset' of undefined`
+**Cause:** `CommonActions` imported from `react-native` instead of `@react-navigation/native`.
+**Fix:** Always import from `@react-navigation/native`:
+```tsx
+// ✅ Correct
+import { CommonActions } from '@react-navigation/native';
+// ❌ Wrong — CommonActions is undefined at runtime
+import { CommonActions } from 'react-native';
+```
+
+### Auth screens: `navigation.getParent()` returns undefined
+**Cause:** Parent reference is unreliable from inside nested `AuthNavigator`.
+**Fix:** Use the `onAuthSuccess` callback prop pattern — see `AuthNavigatorWithSuccess` in `RootNavigator.tsx`.
 
 ### `expo-linear-gradient` version mismatch
 **Cause:** Wrong version installed (v55 vs SDK 54 requirement).
@@ -270,9 +284,9 @@ npx expo-doctor
 ## 📝 Adding New Screens
 
 1. Create the screen file in `src/screens/<section>/`
-2. Add to `DashboardStackNavigator.tsx`
-3. Add navigation type in `src/types/index.ts`
-4. Use `navigation.goBack()` for back, `navigation.popToTop()` to return home
+2. Add to `DashboardStackNavigator.tsx` (NOT `MainTabNavigator`)
+3. Add navigation type in `src/types/index.ts` (`DashboardStackParamList`)
+4. Use `navigation.goBack()` for back, `navigation.popToTop()` to return to dashboard home
 
 ---
 

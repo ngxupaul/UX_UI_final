@@ -17,6 +17,7 @@ export type MainTabParamList = {
   DashboardTab: undefined;
   KhoDeTab: undefined;
   LopHocTab: undefined;
+  ThongKeTab: undefined;
   CaiDatTab: undefined;
 };
 
@@ -32,6 +33,8 @@ export type DashboardStackParamList = {
   ThemCauHoi: { examId?: string; questionId?: string };
   ChinhSuaCauHoi: { examId: string; questionId: string };
   AIGenerator: undefined;
+  AILoading: undefined;
+  Splash: undefined;
   ThongKe: undefined;
   LopHocDetail: { classId: string };
   HocSinhLamBai: { examId: string };

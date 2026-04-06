@@ -6,3 +6,4 @@ export { Chip } from './Chip';
 export { Card } from './Card';
 export { Avatar } from './Avatar';
 export { SearchBar } from './SearchBar';
+export { DeleteConfirmDialog } from './DeleteConfirmDialog';

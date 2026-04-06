@@ -1,22 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
-import { SearchBar, Card, Avatar } from '../../components';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { DashboardStackParamList, Class } from '../../types';
+import type { DashboardStackParamList } from '../../types';
 
 interface Props {
   navigation: NativeStackNavigationProp<DashboardStackParamList>;
 }
 
-const MOCK_CLASSES: Class[] = [
-  { id: '1', name: '10A1 - Toán nâng cao', studentCount: 42, examCount: 5, createdAt: '2025-09-01' },
-  { id: '2', name: '11B2 - Vật lý', studentCount: 38, examCount: 3, createdAt: '2025-09-01' },
-  { id: '3', name: '12C1 - Hóa học', studentCount: 40, examCount: 4, createdAt: '2025-09-01' },
-  { id: '4', name: '10A2 - Ngữ văn', studentCount: 45, examCount: 2, createdAt: '2025-09-01' },
-  { id: '5', name: '11B1 - Sinh học', studentCount: 35, examCount: 3, createdAt: '2025-09-01' },
+const MOCK_CLASSES = [
+  { id: '1', name: 'Lớp 10A1', studentCount: 42, examCount: 3 },
+  { id: '2', name: 'Lớp 10A2', studentCount: 40, examCount: 2 },
+  { id: '3', name: 'Lớp 11A1', studentCount: 38, examCount: 4 },
+  { id: '4', name: 'Lớp 12A1', studentCount: 35, examCount: 5 },
 ];
 
 export const LopHocScreen: React.FC<Props> = ({ navigation }) => {
@@ -28,47 +26,74 @@ export const LopHocScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Quản lý lớp học</Text>
-        <TouchableOpacity style={styles.addBtn}>
-          <Ionicons name="add" size={24} color={Colors.white} />
-        </TouchableOpacity>
-      </View>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Quản lý lớp học</Text>
+          <TouchableOpacity style={styles.addBtn}>
+            <View style={styles.addBtnBg} />
+            <Ionicons name="add" size={20} color={Colors.primary} />
+          </TouchableOpacity>
+        </View>
 
-      {/* Search */}
-      <View style={{ paddingHorizontal: 20, paddingVertical: 8 }}>
-        <SearchBar value={search} onChangeText={setSearch} placeholder="Tìm kiếm lớp học..." />
-      </View>
+        {/* Search Bar */}
+        <View style={styles.searchWrap}>
+          <Ionicons name="search" size={20} color="#6C757D" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Tìm kiếm đề thi, môn học"
+            placeholderTextColor="#6C757D"
+            value={search}
+            onChangeText={setSearch}
+          />
+        </View>
 
-      {/* List */}
-      <FlatList
-        data={filtered}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <Card style={styles.card} onPress={() => navigation.navigate('LopHocDetail', { classId: item.id })}>
-            <View style={styles.cardContent}>
-              <Avatar name={item.name} size={52} />
-              <View style={styles.cardInfo}>
-                <Text style={styles.className}>{item.name}</Text>
-                <View style={styles.cardStats}>
-                  <View style={styles.statBadge}>
-                    <Ionicons name="people-outline" size={14} color={Colors.gray50} />
-                    <Text style={styles.statText}>{item.studentCount} học sinh</Text>
-                  </View>
-                  <View style={styles.statBadge}>
-                    <Ionicons name="document-text-outline" size={14} color={Colors.gray50} />
-                    <Text style={styles.statText}>{item.examCount} đề thi</Text>
-                  </View>
+        {/* Class List */}
+        <View style={styles.listWrap}>
+          {filtered.map((cls) => (
+            <TouchableOpacity
+              key={cls.id}
+              style={styles.classCard}
+              onPress={() => navigation.navigate('LopHocDetail', { classId: cls.id })}
+              activeOpacity={0.8}
+            >
+              {/* More button */}
+              <TouchableOpacity style={styles.moreBtn} onPress={() => {}}>
+                <Ionicons name="ellipsis-horizontal" size={20} color="#6C757D" />
+              </TouchableOpacity>
+
+              {/* Avatar with gradient */}
+              <View style={styles.avatarWrap}>
+                <View style={styles.avatarBadge}>
+                  <Ionicons name="school" size={22} color={Colors.white} />
                 </View>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={Colors.gray50} />
-            </View>
-          </Card>
-        )}
-      />
+
+              {/* Info */}
+              <Text style={styles.className}>{cls.name}</Text>
+
+              {/* Stats row */}
+              <View style={styles.statsRow}>
+                <View style={styles.statItem}>
+                  <Ionicons name="people-outline" size={14} color="#3D4A3D" />
+                  <Text style={styles.statText}>{cls.studentCount} Học sinh</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Ionicons name="document-text-outline" size={14} color="#3D4A3D" />
+                  <Text style={styles.statText}>{cls.examCount} Bài kiểm tra</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <View style={{ height: 120 }} />
+      </ScrollView>
+
+      {/* FAB */}
+      <TouchableOpacity style={styles.fab}>
+        <Ionicons name="add" size={24} color={Colors.textPrimary} />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -79,25 +104,113 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 4,
+    paddingHorizontal: 17,
+    paddingTop: 12,
+    paddingBottom: 8,
+    backgroundColor: Colors.screenBg,
   },
-  title: { fontSize: 24, fontWeight: '700', color: Colors.textPrimary },
-  addBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    letterSpacing: -0.6,
+  },
+  addBtn: { width: 35, height: 35, alignItems: 'center', justifyContent: 'center' },
+  addBtnBg: {
+    position: 'absolute',
+    width: 35,
+    height: 35,
+    borderRadius: 17.5,
+    backgroundColor: Colors.primaryLight,
+  },
+  searchWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    marginHorizontal: 17,
+    marginTop: 4,
+    paddingHorizontal: 14,
+    height: 50,
+    borderRadius: 12,
+    gap: 12,
+    shadowColor: 'rgba(0,0,0,0.15)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: Colors.textPrimary,
+  },
+  listWrap: {
+    paddingHorizontal: 17,
+    marginTop: 16,
+    gap: 10,
+  },
+  classCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    padding: 14,
+    position: 'relative',
+    shadowColor: 'rgba(0,0,0,0.15)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  moreBtn: {
+    position: 'absolute',
+    top: 13,
+    right: 12,
+    padding: 2,
+    zIndex: 1,
+  },
+  avatarWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: 'rgba(240,253,244,0.8)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  avatarBadge: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'absolute',
   },
-  list: { paddingHorizontal: 20, paddingBottom: 120 },
-  card: { marginBottom: 12 },
-  cardContent: { flexDirection: 'row', alignItems: 'center' },
-  cardInfo: { flex: 1, marginLeft: 12 },
-  className: { fontSize: 15, fontWeight: '600', color: Colors.textPrimary, marginBottom: 6 },
-  cardStats: { flexDirection: 'row', gap: 12 },
-  statBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  statText: { fontSize: 12, color: Colors.gray50 },
+  className: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginBottom: 10,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  statText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#3D4A3D',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 100,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
 });

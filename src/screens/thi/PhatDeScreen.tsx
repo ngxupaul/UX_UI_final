@@ -1,9 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
-import { Button, Card } from '../../components';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { DashboardStackParamList } from '../../types';
 
@@ -11,77 +10,178 @@ interface Props {
   navigation: NativeStackNavigationProp<DashboardStackParamList>;
 }
 
-const SHARE_METHODS = [
-  { icon: 'link-outline' as const, label: 'Chia sẻ liên kết', desc: 'Gửi đường dẫn đề thi qua tin nhắn, email' },
-  { icon: 'qr-code-outline' as const, label: 'Mã QR', desc: 'Học sinh quét mã QR để làm bài' },
-  { icon: 'people-outline' as const, label: 'Gửi đến lớp', desc: 'Chọn lớp học để phát đề cho học sinh' },
-  { icon: 'clipboard-outline' as const, label: 'Mã đề thi', desc: 'Tạo mã để học sinh nhập khi làm bài' },
+// QR code placeholder — in real app would be a generated QR image
+const QR_IMG = 'https://www.figma.com/api/mcp/asset/2ce69402-ddda-4e80-93cc-ed8551cd14ed';
+
+const CLASSES = [
+  { id: '1', code: '10A1', name: 'Lớp 10A1', students: 42, selected: true },
+  { id: '2', code: '10A2', name: 'Lớp 10A2', students: 38, selected: true },
+  { id: '3', code: '11B5', name: 'Lớp 11B5', students: 40, selected: false },
+  { id: '4', code: '12C1', name: 'Lớp 12C1', students: 35, selected: false },
 ];
 
 export const PhatDeScreen: React.FC<Props> = ({ navigation }) => {
+  const [passwordEnabled, setPasswordEnabled] = React.useState(true);
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
-          </TouchableOpacity>
-          <Text style={styles.title}>Phát đề & Chia sẻ</Text>
-          <View style={{ width: 24 }} />
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={18} color={Colors.textPrimary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Phát hành đề thi</Text>
+        <TouchableOpacity>
+          <Text style={styles.saveDraft}>Lưu nháp</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Wizard step 3 */}
+      <View style={styles.wizardWrap}>
+        <View style={styles.wizardLeft}>
+          <View style={styles.stepCircle}>
+            <Ionicons name="checkmark" size={14} color={Colors.white} />
+          </View>
+          <Text style={styles.stepLabel}>Thông tin</Text>
+        </View>
+        <View style={styles.wizardLineFilled} />
+        <View style={styles.wizardLeft}>
+          <View style={styles.stepCircle}>
+            <Ionicons name="checkmark" size={14} color={Colors.white} />
+          </View>
+          <Text style={styles.stepLabel}>Câu hỏi</Text>
+        </View>
+        <View style={styles.wizardLineFilled} />
+        <View style={styles.wizardCenter}>
+          <View style={styles.stepCircleActive}>
+            <Text style={styles.stepNum}>3</Text>
+          </View>
+          <Text style={styles.stepLabelActive}>Cài đặt</Text>
+        </View>
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        {/* QR Card */}
+        <View style={styles.qrCard}>
+          <Text style={styles.qrTitle}>Quét mã để làm bài</Text>
+          <Text style={styles.qrExamName}>Kiểm tra 15 phút - Chương 1</Text>
+
+          {/* QR Code */}
+          <View style={styles.qrWrap}>
+            <View style={styles.qrBg}>
+              <Image source={{ uri: QR_IMG }} style={styles.qrImage} />
+            </View>
+          </View>
+
+          {/* Link + copy */}
+          <View style={styles.linkRow}>
+            <Ionicons name="link" size={16} color={Colors.textSecondary} />
+            <Text style={styles.linkText}>hocmai.vn/exam/che…</Text>
+            <TouchableOpacity style={styles.copyBtn}>
+              <Text style={styles.copyBtnText}>Sao chép</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Exam info */}
-        <Card style={styles.examCard}>
-          <Text style={styles.examTitle}>Toán học - HKI</Text>
-          <Text style={styles.examMeta}>Toán · Lớp 10 · 20 câu · 60 phút</Text>
-        </Card>
-
-        {/* Methods */}
-        <Text style={styles.sectionTitle}>Chọn phương thức phát đề</Text>
-        {SHARE_METHODS.map((method, i) => (
-          <TouchableOpacity key={i} style={styles.methodCard}>
-            <View style={styles.methodIcon}>
-              <Ionicons name={method.icon} size={24} color={Colors.primary} />
+        {/* Class Assignment */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionTitleRow}>
+              <Ionicons name="people" size={18} color="#1E293B" />
+              <Text style={styles.sectionTitle}>Giao cho lớp</Text>
             </View>
-            <View style={styles.methodInfo}>
-              <Text style={styles.methodLabel}>{method.label}</Text>
-              <Text style={styles.methodDesc}>{method.desc}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.gray30} />
-          </TouchableOpacity>
-        ))}
+            <TouchableOpacity>
+              <Text style={styles.selectAll}>Chọn tất cả</Text>
+            </TouchableOpacity>
+          </View>
 
-        {/* Settings */}
-        <Text style={styles.sectionTitle}>Cài đặt</Text>
-        <Card style={styles.settingsCard}>
-          {[
-            { label: 'Cho phép làm lại', value: false },
-            { label: 'Hiển thị đáp án sau khi nộp', value: true },
-            { label: 'Thông báo khi nộp bài', value: true },
-            { label: 'Giới hạn thời gian', value: true },
-          ].map((setting, i) => (
-            <View key={i} style={[styles.settingRow, i > 0 ? styles.settingBorder : undefined]}>
-              <Text style={styles.settingLabel}>{setting.label}</Text>
-              <View style={setting.value ? styles.toggleOn : styles.toggleOff}>
-                <View style={setting.value ? styles.toggleThumbOn : styles.toggleThumbOff} />
+          <View style={styles.classGrid}>
+            {CLASSES.map((cls) => (
+              <View
+                key={cls.id}
+                style={[styles.classCard, cls.selected && styles.classCardSelected]}
+              >
+                <View style={styles.classHeader}>
+                  <View style={styles.classBadge}>
+                    <Text style={[styles.classBadgeText, cls.selected && styles.classBadgeTextSelected]}>
+                      {cls.code}
+                    </Text>
+                  </View>
+                  {cls.selected && (
+                    <View style={styles.checkmark}>
+                      <Ionicons name="checkmark" size={12} color={Colors.white} />
+                    </View>
+                  )}
+                </View>
+                <Text style={[styles.className, cls.selected && styles.classNameSelected]}>{cls.name}</Text>
+                <Text style={styles.classStudentCount}>{cls.students} Học sinh</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Exam Settings */}
+        <View style={styles.section}>
+          <View style={styles.sectionTitleRow}>
+            <Ionicons name="settings-outline" size={18} color="#1E293B" />
+            <Text style={styles.sectionTitle}>Cài đặt đề thi</Text>
+          </View>
+
+          {/* Duration */}
+          <View style={styles.settingCard}>
+            <View style={styles.settingLeft}>
+              <View style={[styles.settingIconBg, { backgroundColor: '#FFF7ED' }]}>
+                <Ionicons name="time-outline" size={20} color="#B45309" />
+              </View>
+              <View>
+                <Text style={styles.settingTitle}>Thời gian làm bài</Text>
+                <Text style={styles.settingSub}>Giới hạn thời gian nộp</Text>
               </View>
             </View>
-          ))}
-        </Card>
+            <View style={styles.durationPicker}>
+              <Text style={styles.durationValue}>45</Text>
+              <Text style={styles.durationUnit}>phút</Text>
+              <Ionicons name="chevron-down" size={16} color={Colors.textSecondary} />
+            </View>
+          </View>
 
-        <View style={styles.ctaSection}>
-          <Button title="Phát đề ngay" onPress={() => {}} fullWidth />
-          <Button
-            title="Lưu bản nháp"
-            onPress={() => navigation.goBack()}
-            variant="outline"
-            fullWidth
-            style={{ marginTop: 12 }}
-          />
+          {/* Password */}
+          <View style={styles.settingCard}>
+            <View style={styles.settingLeft}>
+              <View style={[styles.settingIconBg, { backgroundColor: Colors.primaryBg }]}>
+                <Ionicons name="lock-closed-outline" size={20} color={Colors.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.settingTitle}>Mật khẩu đề thi</Text>
+                <Text style={styles.settingSub}>Bảo mật truy cập</Text>
+                {passwordEnabled && (
+                  <View style={styles.passwordInput}>
+                    <Ionicons name="key-outline" size={16} color={Colors.textSecondary} />
+                    <Text style={styles.passwordText}>123456</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+            <Switch
+              value={passwordEnabled}
+              onValueChange={setPasswordEnabled}
+              trackColor={{ false: Colors.gray20, true: Colors.primary }}
+              thumbColor="#FFFFFF"
+            />
+          </View>
         </View>
-        <View style={{ height: 120 }} />
       </ScrollView>
+
+      {/* Bottom CTA */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity
+          style={styles.publishBtn}
+          onPress={() => {}}
+        >
+          <Ionicons name="paper-plane-outline" size={16} color={Colors.white} />
+          <Text style={styles.publishBtnText}>Phát đề ngay</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
@@ -94,59 +194,201 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: Colors.white,
+    backgroundColor: 'rgba(255,255,255,0.9)',
     borderBottomWidth: 1,
-    borderBottomColor: Colors.gray20,
+    borderBottomColor: Colors.borderLight,
   },
-  title: { fontSize: 17, fontWeight: '600', color: Colors.textPrimary },
-  examCard: { margin: 20, marginBottom: 8 },
-  examTitle: { fontSize: 16, fontWeight: '600', color: Colors.textPrimary },
-  examMeta: { fontSize: 13, color: Colors.textSecondary, marginTop: 4 },
-  sectionTitle: { fontSize: 16, fontWeight: '600', color: Colors.textPrimary, paddingHorizontal: 20, marginTop: 20, marginBottom: 12 },
-  methodCard: {
+  backBtn: { padding: 4 },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
+  saveDraft: { fontSize: 14, fontWeight: '600', color: Colors.primary },
+  wizardWrap: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
     backgroundColor: Colors.white,
-    marginHorizontal: 20,
-    marginBottom: 10,
-    padding: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  wizardLeft: { alignItems: 'center' },
+  wizardCenter: { alignItems: 'center' },
+  stepCircle: {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center',
+  },
+  stepCircleActive: {
+    width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.primary,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 4, borderColor: 'rgba(33,196,93,0.15)',
+  },
+  stepNum: { color: Colors.white, fontSize: 14, fontWeight: '700' },
+  stepLabel: { fontSize: 10, fontWeight: '500', color: Colors.primary, marginTop: 4 },
+  stepLabelActive: { fontSize: 10, fontWeight: '700', color: Colors.primary, marginTop: 4 },
+  wizardLineFilled: { width: 60, height: 2, backgroundColor: Colors.primary, marginHorizontal: 6, opacity: 0.8 },
+  scrollContent: { padding: 16, paddingBottom: 100 },
+  qrCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.gray20,
+    marginBottom: 24,
+  },
+  qrTitle: { fontSize: 20, fontWeight: '700', color: '#1E293B', marginBottom: 4 },
+  qrExamName: { fontSize: 16, fontWeight: '600', color: Colors.textPrimary, marginBottom: 16 },
+  qrWrap: { marginBottom: 16 },
+  qrBg: {
+    width: 192,
+    height: 192,
+    borderRadius: 16,
+    backgroundColor: Colors.gray10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.gray20,
+    overflow: 'hidden',
+  },
+  qrImage: { width: 192, height: 192 },
+  linkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.gray10,
+    paddingHorizontal: 17,
+    paddingVertical: 5,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.gray20,
+    gap: 8,
+    width: '100%',
+  },
+  linkText: { flex: 1, fontSize: 14, fontWeight: '500', color: '#334155' },
+  copyBtn: {
+    backgroundColor: Colors.white,
+    paddingHorizontal: 17,
+    paddingVertical: 6,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.gray20,
   },
-  methodIcon: {
-    width: 44,
-    height: 44,
+  copyBtnText: { fontSize: 12, fontWeight: '700', color: Colors.primary },
+  section: { marginBottom: 24 },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#1E293B' },
+  selectAll: { fontSize: 12, fontWeight: '600', color: Colors.primary },
+  classGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  classCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    padding: 16,
+    minWidth: '47%',
+    borderWidth: 2,
+    borderColor: Colors.gray20,
+  },
+  classCardSelected: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryBg,
+  },
+  classHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  classBadge: {
+    backgroundColor: Colors.white,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.gray20,
+  },
+  classBadgeText: { fontSize: 14, fontWeight: '700', color: '#64748B' },
+  classBadgeTextSelected: { color: Colors.primary },
+  checkmark: {
+    width: 20, height: 20, borderRadius: 10,
+    backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center',
+  },
+  className: { fontSize: 14, fontWeight: '700', color: '#334155', marginBottom: 2 },
+  classNameSelected: { color: Colors.primary },
+  classStudentCount: { fontSize: 12, fontWeight: '500', color: 'rgba(21,128,61,0.8)' },
+  settingCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    padding: 17,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: Colors.gray20,
+    marginBottom: 12,
+  },
+  settingLeft: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, flex: 1 },
+  settingIconBg: {
+    width: 40, height: 40, borderRadius: 12,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  settingTitle: { fontSize: 14, fontWeight: '700', color: '#1E293B', marginBottom: 2 },
+  settingSub: { fontSize: 12, color: '#64748B', marginBottom: 8 },
+  durationPicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.gray10,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
     borderRadius: 12,
-    backgroundColor: Colors.primaryLight,
+    borderWidth: 1,
+    borderColor: Colors.gray20,
+    gap: 4,
+  },
+  durationValue: { fontSize: 14, fontWeight: '700', color: '#1E293B' },
+  durationUnit: { fontSize: 12, fontWeight: '500', color: '#64748B' },
+  passwordInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.gray10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.gray20,
+    gap: 6,
+    marginTop: 4,
+  },
+  passwordText: { fontSize: 14, color: '#1E293B', letterSpacing: 1.4, fontFamily: 'monospace' },
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    backgroundColor: Colors.white,
+    borderTopWidth: 1,
+    borderTopColor: Colors.gray20,
+  },
+  publishBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
-  },
-  methodInfo: { flex: 1 },
-  methodLabel: { fontSize: 15, fontWeight: '600', color: Colors.textPrimary },
-  methodDesc: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
-  settingsCard: { marginHorizontal: 20 },
-  settingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14 },
-  settingBorder: { borderTopWidth: 1, borderTopColor: Colors.gray20 },
-  settingLabel: { fontSize: 15, color: Colors.textPrimary },
-  toggleOff: {
-    width: 44,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: Colors.gray30,
-    padding: 2,
-    justifyContent: 'center',
-  },
-  toggleOn: {
-    width: 44,
-    height: 26,
-    borderRadius: 13,
+    gap: 8,
     backgroundColor: Colors.primary,
-    padding: 2,
-    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 16,
+    shadowColor: 'rgba(34,197,94,0.3)',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 1,
+    shadowRadius: 15,
+    elevation: 4,
   },
-  toggleThumbOff: { width: 22, height: 22, borderRadius: 11, backgroundColor: Colors.white },
-  toggleThumbOn: { width: 22, height: 22, borderRadius: 11, backgroundColor: Colors.white, alignSelf: 'flex-end', marginRight: 2 },
-  ctaSection: { padding: 20, marginTop: 16 },
+  publishBtnText: { fontSize: 16, fontWeight: '700', color: Colors.white },
 });

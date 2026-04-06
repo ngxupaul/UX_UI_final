@@ -1,38 +1,50 @@
 // Figma Design System — Flazers Colors
-// Derived from Figma screens (bg: rgb(248,249,250) = #F8F9FA, green: rgb(33,196,93) = #21C05D)
+// Derived from Figma frames: bg #F8F9FA, green #21C05D, dark #0F172A, secondary #64748B
 
 export const Colors = {
   // Primary
   primary: '#21C05D',
-  primaryDark: '#16A34A',
+  primaryDark: '#006E2F',
   primaryLight: '#DCFCE7',
-
-  // Neutrals
-  white: '#FFFFFF',
-  gray10: '#F8F9FA',
-  gray20: '#E9ECEF',
-  gray30: '#DEE2E6',
-  gray50: '#ADB5BD',
-  gray70: '#6C757D',
-  gray90: '#212529',
-  black: '#000000',
-
-  // Semantic
-  success: '#21C05D',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  info: '#3B82F6',
+  primaryBg: '#F0FDF4',
 
   // Screen backgrounds
   screenBg: '#F8F9FA',
-  cardBg: '#FFFFFF',
-  overlayGreen: 'rgba(220,252,231,0.5)',
+  white: '#FFFFFF',
 
   // Text
-  textPrimary: '#000000',
-  textSecondary: '#6C757D',
-  textMuted: '#ADB5BD',
-  textOnPrimary: '#FFFFFF',
+  textPrimary: '#0F172A',
+  textSecondary: '#64748B',
+  textMuted: '#94A3B8',
+
+  // Neutrals
+  gray10: '#F8FAFC',
+  gray20: '#E2E8F0',
+  gray30: '#CBD5E1',
+  gray50: '#94A3B8',
+  gray70: '#64748B',
+
+  // Borders
+  border: '#E2E8F0',
+  borderLight: '#F1F5F9',
+
+  // Semantic
+  success: '#21C05D',
+  successBg: '#ECFDF5',
+  successText: '#15803D',
+  warning: '#B45309',
+  warningBg: '#FEF3C7',
+  info: '#3B82F6',
+  infoBg: '#EFF6FF',
+  error: '#EF4444',
+
+  // Shadows
+  shadow: 'rgba(0,0,0,0.08)',
+  shadowLight: 'rgba(0,0,0,0.05)',
+
+  // Bottom nav
+  navBg: '#FFFFFF',
+  navBorder: '#F1F5F9',
 } as const;
 
 export type ColorKey = keyof typeof Colors;
