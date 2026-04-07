@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
@@ -182,7 +182,16 @@ export const AIGeneratorScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* Generate button */}
       <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.generateBtn}>
+        <TouchableOpacity
+          style={styles.generateBtn}
+          onPress={() => {
+            if (!prompt.trim()) {
+              Alert.alert('Thông báo', 'Vui lòng nhập yêu cầu để tạo đề thi');
+              return;
+            }
+            navigation.navigate('AILoading');
+          }}
+        >
           <Ionicons name="bulb" size={18} color={Colors.white} />
           <Text style={styles.generateBtnText}>Tạo đề ngay</Text>
         </TouchableOpacity>

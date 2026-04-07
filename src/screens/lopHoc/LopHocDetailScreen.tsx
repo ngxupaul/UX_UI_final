@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,6 +22,7 @@ const MOCK_STUDENTS = [
 ];
 
 export const LopHocDetailScreen: React.FC<Props> = ({ navigation, route }) => {
+  const [activeTab, setActiveTab] = useState<'students' | 'exams' | 'results'>('students');
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
@@ -43,36 +44,63 @@ export const LopHocDetailScreen: React.FC<Props> = ({ navigation, route }) => {
 
       {/* Tabs */}
       <View style={styles.tabsRow}>
-        {['Học sinh', 'Đề thi', 'Kết quả'].map((tab, i) => (
-          <View key={tab} style={i === 0 ? styles.tabActive : styles.tab}>
-            <Text style={i === 0 ? styles.tabTextActive : styles.tabText}>{tab}</Text>
-          </View>
-        ))}
+        {([
+          { key: 'students' as const, label: 'Học sinh' },
+          { key: 'exams' as const, label: 'Đề thi' },
+          { key: 'results' as const, label: 'Kết quả' },
+        ] as const).map((tab) => {
+          const isActive = activeTab === tab.key;
+          return (
+            <TouchableOpacity
+              key={tab.key}
+              style={isActive ? styles.tabActive : styles.tab}
+              onPress={() => setActiveTab(tab.key)}
+            >
+              <Text style={isActive ? styles.tabTextActive : styles.tabText}>{tab.label}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
-      {/* Student list */}
-      <FlatList
-        data={MOCK_STUDENTS}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <Card style={styles.card}>
-            <View style={styles.studentRow}>
-              <Avatar name={item.name} size={44} />
-              <View style={styles.studentInfo}>
-                <Text style={styles.studentName}>{item.name}</Text>
-                <Text style={styles.studentEmail}>{item.email}</Text>
+      {/* Tab Content */}
+      {activeTab === 'students' && (
+        <FlatList
+          data={MOCK_STUDENTS}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <Card style={styles.card}>
+              <View style={styles.studentRow}>
+                <Avatar name={item.name} size={44} />
+                <View style={styles.studentInfo}>
+                  <Text style={styles.studentName}>{item.name}</Text>
+                  <Text style={styles.studentEmail}>{item.email}</Text>
+                </View>
+                <View style={[styles.statusBadge, { backgroundColor: item.status === 'completed' ? Colors.primaryLight : Colors.gray20 }]}>
+                  <Text style={[styles.statusText, { color: item.status === 'completed' ? Colors.primary : Colors.gray50 }]}>
+                    {item.status === 'completed' ? 'Đã nộp' : 'Chưa nộp'}
+                  </Text>
+                </View>
               </View>
-              <View style={[styles.statusBadge, { backgroundColor: item.status === 'completed' ? Colors.primaryLight : Colors.gray20 }]}>
-                <Text style={[styles.statusText, { color: item.status === 'completed' ? Colors.primary : Colors.gray50 }]}>
-                  {item.status === 'completed' ? 'Đã nộp' : 'Chưa nộp'}
-                </Text>
-              </View>
-            </View>
-          </Card>
-        )}
-      />
+            </Card>
+          )}
+        />
+      )}
+
+      {activeTab === 'exams' && (
+        <View style={styles.emptyTab}>
+          <Ionicons name="document-text-outline" size={48} color={Colors.gray30} />
+          <Text style={styles.emptyTabText}>Chưa có đề thi nào</Text>
+        </View>
+      )}
+
+      {activeTab === 'results' && (
+        <View style={styles.emptyTab}>
+          <Ionicons name="analytics-outline" size={48} color={Colors.gray30} />
+          <Text style={styles.emptyTabText}>Chưa có kết quả nào</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -95,7 +123,7 @@ const styles = StyleSheet.create({
   classMeta: { fontSize: 13, color: Colors.textSecondary, marginTop: 4 },
   tabsRow: { flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 12, backgroundColor: Colors.white },
   tab: { flex: 1, alignItems: 'center', paddingVertical: 8, borderBottomWidth: 2, borderBottomColor: 'transparent' },
-  tabActive: { borderBottomColor: Colors.primary },
+  tabActive: { flex: 1, alignItems: 'center', paddingVertical: 8, borderBottomWidth: 2, borderBottomColor: Colors.primary },
   tabText: { fontSize: 14, color: Colors.textSecondary, fontWeight: '500' },
   tabTextActive: { color: Colors.primary, fontWeight: '600' },
   list: { paddingHorizontal: 20, paddingVertical: 12, paddingBottom: 120 },
@@ -106,4 +134,6 @@ const styles = StyleSheet.create({
   studentEmail: { fontSize: 12, color: Colors.textSecondary },
   statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   statusText: { fontSize: 12, fontWeight: '600' },
+  emptyTab: { alignItems: 'center', paddingTop: 60, paddingHorizontal: 20 },
+  emptyTabText: { fontSize: 15, color: Colors.gray50, marginTop: 12 },
 });

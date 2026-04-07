@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
+import { DeleteConfirmDialog } from '../../components';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { DashboardStackParamList } from '../../types';
 
@@ -23,8 +24,9 @@ export const ChinhSuaCauHoiScreen: React.FC<Props> = ({ navigation }) => {
   );
   const [options, setOptions] = useState(OPTIONS);
   const [explanation, setExplanation] = useState(
-    'Số 17 chỉ có hai ước số là 1 và chính nó (17), do đó 17 là số nguyên tố. Các số còn lại: 25 chia hết cho 5; 49 chia hết cho 7; 9 chia hết cho 3.'
+    'Việt Nam nằm ở phía Đông của bán đảo Đông Dương. Bán đảo Đông Dương bao gồm ba nước: Việt Nam (phía Đông), Lào (phía Tây Bắc) và Campuchia (phía Nam).'
   );
+  const [deleteVisible, setDeleteVisible] = useState(false);
 
   const toggleCorrect = (idx: number) => {
     setOptions(options.map((o, i) => ({ ...o, isCorrect: i === idx })));
@@ -42,6 +44,15 @@ export const ChinhSuaCauHoiScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.saveBtn}>Lưu</Text>
         </TouchableOpacity>
       </View>
+
+      <DeleteConfirmDialog
+        visible={deleteVisible}
+        onConfirm={() => {
+          setDeleteVisible(false);
+          navigation.goBack();
+        }}
+        onCancel={() => setDeleteVisible(false)}
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Question content section */}
@@ -133,7 +144,7 @@ export const ChinhSuaCauHoiScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* Bottom bar */}
       <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.deleteBtn} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.deleteBtn} onPress={() => setDeleteVisible(true)}>
           <Ionicons name="trash-outline" size={16} color="#475569" />
           <Text style={styles.deleteBtnText}>Xóa</Text>
         </TouchableOpacity>

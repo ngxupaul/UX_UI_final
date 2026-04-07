@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
@@ -140,18 +140,28 @@ export const ThietLapDeThiScreen: React.FC<Props> = ({ navigation }) => {
                 )}
               </View>
             </View>
-            <View style={styles.switchWrap}>
+            <TouchableOpacity
+              style={styles.switchWrap}
+              onPress={() => setPasswordEnabled(!passwordEnabled)}
+              activeOpacity={0.8}
+            >
               <View style={[styles.switchTrack, passwordEnabled && styles.switchTrackOn]}>
-                {passwordEnabled && <View style={styles.switchThumb} />}
+                <View style={[styles.switchThumb, passwordEnabled && styles.switchThumbOn]} />
               </View>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
 
       {/* Bottom CTA */}
       <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.publishBtn}>
+        <TouchableOpacity
+          style={styles.publishBtn}
+          onPress={() => {
+            Alert.alert('Thành công', 'Đề thi đã được phát hành!');
+            navigation.goBack();
+          }}
+        >
           <Ionicons name="paper-plane-outline" size={16} color={Colors.white} />
           <Text style={styles.publishBtnText}>Phát đề ngay</Text>
         </TouchableOpacity>
@@ -237,7 +247,8 @@ const styles = StyleSheet.create({
   switchWrap: { justifyContent: 'center' },
   switchTrack: { width: 44, height: 24, borderRadius: 12, backgroundColor: Colors.gray20, padding: 2, justifyContent: 'center' },
   switchTrackOn: { backgroundColor: Colors.primary },
-  switchThumb: { alignSelf: 'flex-end', width: 20, height: 20, borderRadius: 10, backgroundColor: Colors.white },
+  switchThumb: { width: 20, height: 20, borderRadius: 10, backgroundColor: Colors.white },
+  switchThumbOn: { alignSelf: 'flex-end' },
   bottomBar: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: Colors.white, borderTopWidth: 1, borderTopColor: Colors.gray20 },
   publishBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.primary, paddingVertical: 14, borderRadius: 16, shadowColor: 'rgba(34,197,94,0.3)', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 1, shadowRadius: 15, elevation: 4 },
   publishBtnText: { fontSize: 16, fontWeight: '700', color: Colors.white },

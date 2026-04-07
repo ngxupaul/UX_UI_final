@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
@@ -11,141 +20,550 @@ interface Props {
   onAuthSuccess?: () => void;
 }
 
+type RoleType = 'teacher' | 'student';
+
 export const RegisterScreen: React.FC<Props> = ({ navigation, onAuthSuccess }) => {
+  const [selectedRole, setSelectedRole] = useState<RoleType>('teacher');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
   const [showPw, setShowPw] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [errors, setErrors] = useState<{ fullName?: string; email?: string; password?: string }>({});
+
+  const validateEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
 
   const handleRegister = () => {
-    if (!fullName || !email || !password || !confirm) return;
+    const newErrors: typeof errors = {};
+    if (!fullName.trim()) newErrors.fullName = 'Vui lòng nhập họ và tên';
+    if (!email.trim()) newErrors.email = 'Vui lòng nhập email';
+    else if (!validateEmail(email)) newErrors.email = 'Email không hợp lệ';
+    if (!password) newErrors.password = 'Vui lòng nhập mật khẩu';
+    else if (password.length < 6) newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+    setErrors({});
     onAuthSuccess?.();
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        <View style={styles.overlayTop} />
-        <View style={styles.overlayBottom} />
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={20} color={Colors.textPrimary} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Tạo tài khoản mới</Text>
-          <View style={{ width: 32 }} />
-        </View>
-        <Text style={styles.subtitle}>Đăng ký để bắt đầu sử dụng Flazers</Text>
-        <View style={styles.form}>
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Họ và tên</Text>
-            <View style={styles.inputWrap}>
-              <Ionicons name="person-outline" size={20} color={Colors.gray50} style={styles.inputIcon} />
-              <TextInput style={styles.input} placeholder="Nhập họ và tên của bạn" placeholderTextColor={Colors.textMuted} value={fullName} onChangeText={setFullName} autoCapitalize="words" />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Blurred overlay blobs */}
+          <View style={styles.overlayTop} />
+          <View style={styles.overlayBottom} />
+
+          {/* ── Header ── */}
+          <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.backBtn}
+              onPress={() => navigation.goBack()}
+            >
+              <Ionicons name="chevron-back" size={20} color={Colors.textPrimary} />
+            </TouchableOpacity>
+
+            <View style={styles.headerDividerWrap}>
+              <View style={styles.headerDivider} />
             </View>
+
+            <TouchableOpacity style={styles.helpBtn}>
+              <Text style={styles.helpBtnText}>Trợ giúp</Text>
+            </TouchableOpacity>
           </View>
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Email</Text>
-            <View style={styles.inputWrap}>
-              <Ionicons name="mail-outline" size={20} color={Colors.gray50} style={styles.inputIcon} />
-              <TextInput style={styles.input} placeholder="Nhập email của bạn" placeholderTextColor={Colors.textMuted} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-            </View>
+
+          {/* ── Heading ── */}
+          <View style={styles.headingWrap}>
+            <Text style={styles.headingTitle}>Đăng ký tài khoản</Text>
+            <Text style={styles.headingSubtitle}>
+              Chào mừng bạn! Vui lòng điền thông tin bên dưới để bắt đầu hành trình học tập.
+            </Text>
           </View>
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Mật khẩu</Text>
-            <View style={styles.inputWrap}>
-              <Ionicons name="lock-closed-outline" size={20} color={Colors.gray50} style={styles.inputIcon} />
-              <TextInput style={styles.input} placeholder="Tạo mật khẩu (ít nhất 8 ký tự)" placeholderTextColor={Colors.textMuted} value={password} onChangeText={setPassword} secureTextEntry={!showPw} />
-              <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPw(!showPw)}>
-                <Ionicons name={showPw ? 'eye-off-outline' : 'eye-outline'} size={20} color={Colors.gray50} />
+
+          {/* ── Role Selector ── */}
+          <View style={styles.roleSection}>
+            <Text style={styles.roleLabel}>Bạn là ai?</Text>
+            <View style={styles.roleCards}>
+              <TouchableOpacity
+                style={[
+                  styles.roleCard,
+                  selectedRole === 'teacher' && styles.roleCardActive,
+                ]}
+                onPress={() => setSelectedRole('teacher')}
+                activeOpacity={0.8}
+              >
+                <View
+                  style={[
+                    styles.roleIconWrap,
+                    selectedRole === 'teacher' && styles.roleIconWrapActive,
+                  ]}
+                >
+                  <Ionicons
+                    name="school-outline"
+                    size={24}
+                    color={selectedRole === 'teacher' ? Colors.primary : '#64748B'}
+                  />
+                </View>
+                <Text
+                  style={[
+                    styles.roleCardText,
+                    selectedRole === 'teacher' && styles.roleCardTextActive,
+                  ]}
+                >
+                  Giáo viên
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.roleCard,
+                  selectedRole === 'student' && styles.roleCardActive,
+                ]}
+                onPress={() => setSelectedRole('student')}
+                activeOpacity={0.8}
+              >
+                <View
+                  style={[
+                    styles.roleIconWrap,
+                    selectedRole === 'student' && styles.roleIconWrapActive,
+                  ]}
+                >
+                  <Ionicons
+                    name="person-outline"
+                    size={24}
+                    color={selectedRole === 'student' ? Colors.primary : '#64748B'}
+                  />
+                </View>
+                <Text
+                  style={[
+                    styles.roleCardText,
+                    selectedRole === 'student' && styles.roleCardTextActive,
+                  ]}
+                >
+                  Học sinh
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Xác nhận mật khẩu</Text>
-            <View style={styles.inputWrap}>
-              <Ionicons name="lock-closed-outline" size={20} color={Colors.gray50} style={styles.inputIcon} />
-              <TextInput style={styles.input} placeholder="Nhập lại mật khẩu" placeholderTextColor={Colors.textMuted} value={confirm} onChangeText={setConfirm} secureTextEntry={!showConfirm} />
-              <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowConfirm(!showConfirm)}>
-                <Ionicons name={showConfirm ? 'eye-off-outline' : 'eye-outline'} size={20} color={Colors.gray50} />
-              </TouchableOpacity>
+
+          {/* ── Form ── */}
+          <View style={styles.form}>
+            {/* Họ và tên */}
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Họ và tên *</Text>
+              <View
+                style={[
+                  styles.inputWrap,
+                  errors.fullName && styles.inputWrapError,
+                ]}
+              >
+                <View style={styles.inputIconWrap}>
+                  <Ionicons name="person-outline" size={16} color="#94A3B8" />
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập họ tên của bạn"
+                  placeholderTextColor="#94A3B8"
+                  value={fullName}
+                  onChangeText={(t) => { setFullName(t); setErrors((e) => ({ ...e, fullName: undefined })); }}
+                  autoCapitalize="words"
+                />
+              </View>
+              {errors.fullName && (
+                <Text style={styles.errorText}>{errors.fullName}</Text>
+              )}
+            </View>
+
+            {/* Email */}
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Email *</Text>
+              <View
+                style={[
+                  styles.inputWrap,
+                  errors.email && styles.inputWrapError,
+                ]}
+              >
+                <View style={styles.inputIconWrap}>
+                  <Ionicons name="mail-outline" size={16} color="#94A3B8" />
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="name@example.com"
+                  placeholderTextColor="#94A3B8"
+                  value={email}
+                  onChangeText={(t) => { setEmail(t); setErrors((e) => ({ ...e, email: undefined })); }}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+              {errors.email && (
+                <Text style={styles.errorText}>{errors.email}</Text>
+              )}
+            </View>
+
+            {/* Mật khẩu */}
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Mật khẩu *</Text>
+              <View
+                style={[
+                  styles.inputWrap,
+                  errors.password && styles.inputWrapError,
+                ]}
+              >
+                <View style={styles.inputIconWrap}>
+                  <Ionicons name="lock-closed-outline" size={16} color="#94A3B8" />
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="••••••••"
+                  placeholderTextColor="#94A3B8"
+                  value={password}
+                  onChangeText={(t) => { setPassword(t); setErrors((e) => ({ ...e, password: undefined })); }}
+                  secureTextEntry={!showPw}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity
+                  style={styles.eyeBtn}
+                  onPress={() => setShowPw(!showPw)}
+                >
+                  <Ionicons
+                    name={showPw ? 'eye-off-outline' : 'eye-outline'}
+                    size={16}
+                    color="#94A3B8"
+                  />
+                </TouchableOpacity>
+              </View>
+              {errors.password && (
+                <Text style={styles.errorText}>{errors.password}</Text>
+              )}
             </View>
           </View>
-          <Text style={styles.terms}>
-            Bằng việc đăng ký, bạn đã đồng ý với{' '}
-            <Text style={styles.termsLink}>Điều khoản sử dụng</Text> và{' '}
-            <Text style={styles.termsLink}>Chính sách bảo mật</Text> của Flazers
-          </Text>
-          <TouchableOpacity style={styles.registerBtn} onPress={handleRegister}>
-            <Text style={styles.registerBtnText}>Tạo tài khoản</Text>
-            <Ionicons name="arrow-forward" size={18} color={Colors.white} />
+
+          {/* ── Register Button ── */}
+          <TouchableOpacity
+            style={styles.registerBtn}
+            onPress={handleRegister}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.registerBtnText}>Đăng ký</Text>
           </TouchableOpacity>
+
+          {/* ── Divider ── */}
+          <View style={styles.dividerWrap}>
+            <View style={styles.dividerLine} />
+            <View style={styles.dividerBadge}>
+              <Text style={styles.dividerText}>HOẶC ĐĂNG KÝ VỚI</Text>
+            </View>
+          </View>
+
+          {/* ── Social Buttons ── */}
+          <View style={styles.socialRow}>
+            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.8}>
+              <Ionicons name="logo-google" size={20} color="#4285F4" />
+              <Text style={styles.socialBtnText}>Google</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.socialBtn} activeOpacity={0.8}>
+              <Ionicons name="logo-facebook" size={20} color="#1877F2" />
+              <Text style={styles.socialBtnText}>Facebook</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* ── Login Link ── */}
           <View style={styles.loginRow}>
             <Text style={styles.loginText}>Đã có tài khoản? </Text>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Text style={styles.loginLink}>Đăng nhập ngay</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.white },
-  scroll: { flexGrow: 1, paddingHorizontal: 16 },
+  scroll: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+
+  /* ── Overlays ── */
   overlayTop: {
     position: 'absolute',
-    top: -120, left: -100,
-    width: 215, height: 280,
+    top: -93,
+    left: -43,
+    width: 215,
+    height: 280,
     backgroundColor: 'rgba(240,253,244,0.5)',
     borderRadius: 150,
+    zIndex: 0,
   },
   overlayBottom: {
     position: 'absolute',
-    bottom: 0, right: -60,
-    width: 172, height: 280,
+    bottom: 0,
+    right: -60,
+    width: 172,
+    height: 280,
     backgroundColor: 'rgba(220,252,231,0.5)',
     borderRadius: 100,
+    zIndex: 0,
   },
+
+  /* ── Header ── */
   header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingTop: 8, marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 12,
+    marginBottom: 24,
+    zIndex: 1,
   },
   backBtn: {
-    width: 32, height: 32, borderRadius: 16,
-    backgroundColor: Colors.gray10,
-    alignItems: 'center', justifyContent: 'center',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
-  subtitle: { fontSize: 14, color: Colors.textSecondary, marginBottom: 28, textAlign: 'center' },
-  form: { paddingBottom: 24 },
-  fieldGroup: { marginBottom: 16 },
+  headerDividerWrap: {
+    flex: 1,
+    alignItems: 'center',
+    marginHorizontal: 16,
+  },
+  headerDivider: {
+    height: 1,
+    width: '100%',
+    backgroundColor: '#E2E8F0',
+  },
+  helpBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  helpBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+
+  /* ── Heading ── */
+  headingWrap: {
+    marginBottom: 20,
+    zIndex: 1,
+  },
+  headingTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#0F172A',
+    letterSpacing: -0.5,
+    marginBottom: 8,
+  },
+  headingSubtitle: {
+    fontSize: 14,
+    color: '#64748B',
+    lineHeight: 22,
+  },
+
+  /* ── Role Selector ── */
+  roleSection: {
+    marginBottom: 20,
+    zIndex: 1,
+  },
+  roleLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#0F172A',
+    marginBottom: 10,
+  },
+  roleCards: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  roleCard: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#E2E8F0',
+    gap: 8,
+  },
+  roleCardActive: {
+    borderColor: Colors.primary,
+    backgroundColor: '#F0FDF4',
+  },
+  roleIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  roleIconWrapActive: {
+    backgroundColor: '#DCFCE7',
+  },
+  roleCardText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  roleCardTextActive: {
+    color: Colors.primary,
+  },
+
+  /* ── Form ── */
+  form: {
+    marginBottom: 16,
+    zIndex: 1,
+  },
+  fieldGroup: {
+    marginBottom: 14,
+  },
   label: {
-    fontSize: 12, fontWeight: '600', color: Colors.textPrimary,
-    letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 8, paddingLeft: 4,
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#0F172A',
+    marginBottom: 6,
   },
   inputWrap: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#F8FAFC', borderWidth: 1, borderColor: Colors.gray20,
-    borderRadius: 16, paddingHorizontal: 16, height: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    height: 47,
+    paddingRight: 12,
+    overflow: 'hidden',
   },
-  inputIcon: { marginRight: 12 },
-  input: { flex: 1, fontSize: 16, color: Colors.textPrimary },
-  eyeBtn: { padding: 8 },
-  terms: {
-    fontSize: 12, color: Colors.textSecondary, textAlign: 'center',
-    marginBottom: 20, lineHeight: 18, paddingHorizontal: 8,
+  inputWrapError: {
+    borderColor: Colors.error,
   },
-  termsLink: { color: Colors.primary, fontWeight: '500' },
+  inputIconWrap: {
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    color: '#0F172A',
+    paddingVertical: 0,
+  },
+  eyeBtn: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorText: {
+    fontSize: 12,
+    color: Colors.error,
+    marginTop: 4,
+    marginLeft: 4,
+  },
+
+  /* ── Register Button ── */
   registerBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: Colors.primary, height: 52, borderRadius: 24, marginBottom: 16,
+    backgroundColor: Colors.primary,
+    height: 52,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: 'rgba(34,197,94,0.35)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    elevation: 4,
+    marginBottom: 20,
+    zIndex: 1,
   },
-  registerBtnText: { fontSize: 16, fontWeight: '700', color: Colors.white },
-  loginRow: { flexDirection: 'row', justifyContent: 'center' },
-  loginText: { fontSize: 14, color: Colors.textSecondary },
-  loginLink: { fontSize: 14, color: Colors.primary, fontWeight: '600' },
+  registerBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.white,
+  },
+
+  /* ── Divider ── */
+  dividerWrap: {
+    position: 'relative',
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    zIndex: 1,
+  },
+  dividerLine: {
+    position: 'absolute',
+    top: 7.5,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: '#E2E8F0',
+  },
+  dividerBadge: {
+    backgroundColor: Colors.white,
+    paddingHorizontal: 16,
+  },
+  dividerText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#94A3B8',
+    letterSpacing: 0.8,
+  },
+
+  /* ── Social Buttons ── */
+  socialRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+    zIndex: 1,
+  },
+  socialBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 54,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    shadowColor: 'rgba(0,0,0,0.05)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  socialBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#0F172A',
+  },
+
+  /* ── Login Link ── */
+  loginRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+  loginText: {
+    fontSize: 14,
+    color: '#64748B',
+  },
+  loginLink: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.primary,
+  },
 });

@@ -42,7 +42,7 @@ const WizardStep = () => (
   </View>
 );
 
-const MOCK_QUESTIONS = [
+const MOCK_QUESTIONS_DATA = [
   {
     num: '01',
     type: 'Trắc nghiệm',
@@ -86,11 +86,14 @@ const MOCK_QUESTIONS = [
 ];
 
 export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
+  const [questions, setQuestions] = useState(MOCK_QUESTIONS_DATA);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const handleDeletePress = (num: string) => setDeleteTarget(num);
   const handleDeleteConfirm = () => {
-    // TODO: remove question from state
+    if (deleteTarget !== null) {
+      setQuestions(questions.filter((q) => q.num !== deleteTarget));
+    }
     setDeleteTarget(null);
   };
 
@@ -118,7 +121,7 @@ export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* List header */}
         <View style={styles.listHeader}>
-          <Text style={styles.listTitle}>Danh sách câu hỏi (5)</Text>
+          <Text style={styles.listTitle}>Danh sách câu hỏi ({questions.length})</Text>
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.iconActionBtn}>
               <Ionicons name="grid-outline" size={16} color="#64748B" />
@@ -139,7 +142,7 @@ export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         {/* Question cards */}
-        {MOCK_QUESTIONS.map((q) => (
+        {questions.map((q) => (
           <View key={q.num} style={styles.questionCard}>
             {/* Question number */}
             <View style={styles.qNumBadge}>

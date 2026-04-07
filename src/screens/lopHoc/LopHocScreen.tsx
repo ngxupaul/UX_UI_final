@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
@@ -30,7 +30,10 @@ export const LopHocScreen: React.FC<Props> = ({ navigation }) => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Quản lý lớp học</Text>
-          <TouchableOpacity style={styles.addBtn}>
+          <TouchableOpacity
+            style={styles.addBtn}
+            onPress={() => Alert.alert('Thông báo', 'Chức năng đang phát triển')}
+          >
             <View style={styles.addBtnBg} />
             <Ionicons name="add" size={20} color={Colors.primary} />
           </TouchableOpacity>
@@ -91,8 +94,11 @@ export const LopHocScreen: React.FC<Props> = ({ navigation }) => {
       </ScrollView>
 
       {/* FAB */}
-      <TouchableOpacity style={styles.fab}>
-        <Ionicons name="add" size={24} color={Colors.textPrimary} />
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => Alert.alert('Thông báo', 'Chức năng đang phát triển')}
+      >
+        <Ionicons name="add" size={24} color={Colors.white} />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -208,9 +214,18 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    bottom: 100,
-    left: 0,
-    right: 0,
+    bottom: 24,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.primary,
     alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: 'rgba(34,197,94,0.4)',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    elevation: 8,
   },
 });

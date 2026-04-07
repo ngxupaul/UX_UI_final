@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_figma_figma__get_design_context",
+      "mcp__plugin_figma_figma__get_screenshot",
+      "mcp__plugin_figma_figma__whoami",
+      "mcp__plugin_figma_figma__get_metadata",
+      "Bash(findstr /C:\"name\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); const path='C:\\\\\\\\Users\\\\\\\\THIEN QUOC AN\\\\\\\\.claude\\\\\\\\projects\\\\\\\\c--Users-THIEN-QUOC-AN-Desktop-UX-UI-FlazersApp\\\\\\\\2e5b2d2d-ae48-4166-bf73-f03110744350\\\\\\\\tool-results\\\\\\\\call_function_x95kmrch5dfn_1.json'; const data=JSON.parse\\(fs.readFileSync\\(path,'utf8'\\)\\); for\\(let i=0;i<Math.min\\(data.length,50\\);i++\\){const item=data[i]; if\\(item.type==='FRAME'||item.type==='CANVAS'\\){console.log\\(item.name+' ['+item.id+'] x='+item.x+' y='+item.y\\);}}\")"
+    ]
+  }
+}

@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
 import { Avatar } from '../../components';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { CommonActions } from '@react-navigation/native';
 import type { DashboardStackParamList } from '../../types';
 
 // Avatar photo URL from Figma
@@ -23,7 +24,7 @@ export const CaiDatScreen: React.FC<Props> = ({ navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Cài đặt</Text>
-        <TouchableOpacity style={styles.bellBtn}>
+        <TouchableOpacity style={styles.bellBtn} onPress={() => Alert.alert('Thông báo', 'Không có thông báo mới')}>
           <Ionicons name="notifications-outline" size={22} color={Colors.textPrimary} />
         </TouchableOpacity>
       </View>
@@ -34,7 +35,7 @@ export const CaiDatScreen: React.FC<Props> = ({ navigation }) => {
           {/* Avatar with edit badge */}
           <View style={styles.avatarWrap}>
             <Image source={{ uri: AVATAR_IMG }} style={styles.avatarImg} />
-            <TouchableOpacity style={styles.editBadge}>
+            <TouchableOpacity style={styles.editBadge} onPress={() => Alert.alert('Thông báo', 'Chức năng đang phát triển')}>
               <Ionicons name="pencil" size={10} color={Colors.white} />
             </TouchableOpacity>
           </View>
@@ -50,7 +51,7 @@ export const CaiDatScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.sectionLabel}>Tài khoản & Chung</Text>
           <View style={styles.card}>
             {/* Thông tin cá nhân */}
-            <TouchableOpacity style={styles.menuRow}>
+            <TouchableOpacity style={styles.menuRow} onPress={() => Alert.alert('Thông báo', 'Chức năng đang phát triển')}>
               <View style={styles.menuIconWrap}>
                 <Ionicons name="person-outline" size={20} color="#334155" />
               </View>
@@ -61,7 +62,7 @@ export const CaiDatScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.divider} />
 
             {/* Ngôn ngữ */}
-            <TouchableOpacity style={styles.menuRow}>
+            <TouchableOpacity style={styles.menuRow} onPress={() => Alert.alert('Thông báo', 'Chức năng đang phát triển')}>
               <View style={styles.menuIconWrap}>
                 <Ionicons name="language-outline" size={20} color="#334155" />
               </View>
@@ -111,7 +112,30 @@ export const CaiDatScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         {/* Logout */}
-        <TouchableOpacity style={styles.logoutBtn}>
+        <TouchableOpacity
+          style={styles.logoutBtn}
+          onPress={() => {
+            Alert.alert(
+              'Đăng xuất',
+              'Bạn có chắc muốn đăng xuất?',
+              [
+                { text: 'Hủy', style: 'cancel' },
+                {
+                  text: 'Đăng xuất',
+                  style: 'destructive',
+                  onPress: () => {
+                    navigation.dispatch(
+                      CommonActions.reset({
+                        index: 0,
+                        routes: [{ name: 'Auth' }],
+                      })
+                    );
+                  },
+                },
+              ]
+            );
+          }}
+        >
           <Ionicons name="log-out-outline" size={18} color={Colors.error} />
           <Text style={styles.logoutText}>Đăng xuất</Text>
         </TouchableOpacity>

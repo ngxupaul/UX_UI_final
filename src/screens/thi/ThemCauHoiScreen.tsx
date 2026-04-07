@@ -20,7 +20,7 @@ const OPTIONS_DATA = [
 export const ThemCauHoiScreen: React.FC<Props> = ({ navigation }) => {
   const [question, setQuestion] = useState('Việt Nam nằm ở phía nào của bán đảo Đông Dương?');
   const [explanation, setExplanation] = useState(
-    'Số 17 chỉ có hai ước số là 1 và chính nó (17), do đó 17 là số nguyên tố. Các số còn lại: 25 chia hết cho 5; 49 chia hết cho 7; 9 chia hết cho 3.'
+    'Việt Nam nằm ở phía Đông của bán đảo Đông Dương. Bán đảo Đông Dương bao gồm ba nước: Việt Nam (phía Đông), Lào (phía Tây Bắc) và Campuchia (phía Nam).'
   );
   const [options, setOptions] = useState(OPTIONS_DATA);
 

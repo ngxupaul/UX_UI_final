@@ -12,7 +12,7 @@ interface Props {
   route: RouteProp<DashboardStackParamList, 'KhoDeDetail'>;
 }
 
-type TabKey = 'open' | 'draft' | 'closed';
+type TabKey = 'all' | 'open' | 'draft' | 'closed';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'all', label: 'Tất cả' },
@@ -21,7 +21,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'closed', label: 'Đã đóng' },
 ];
 
-const MOCK_EXAMS: Record<string, { id: string; title: string; subject: string; date: string; status: TabKey; subjectColor: string; studentCount: number }[]> = {
+const MOCK_EXAMS: Record<string, { id: string; title: string; subject: string; date: string; status: 'open' | 'draft' | 'closed'; subjectColor: string; studentCount: number }[]> = {
   open: [
     { id: '1', title: 'Kiểm tra 15 phút - Chương 1', subject: 'Địa lý 6', date: '20/10/2025', status: 'open', subjectColor: '#DCFCE7', studentCount: 45 },
   ],
@@ -92,7 +92,7 @@ export const KhoDeDetailScreen: React.FC<Props> = ({ navigation, route }) => {
 
         {/* Pill Tabs */}
         <View style={styles.tabsWrap}>
-          {TABS.filter((t) => t.key === 'all' || t.key === activeTab || true).map((tab) => {
+          {TABS.filter((t) => t.key === 'all' || t.key === activeTab).map((tab) => {
             const isActive = activeTab === tab.key;
             return (
               <TouchableOpacity
@@ -110,10 +110,13 @@ export const KhoDeDetailScreen: React.FC<Props> = ({ navigation, route }) => {
 
         {/* Exam List */}
         <View style={styles.listWrap}>
-          {['all', 'open', 'draft', 'closed'].map((tabKey) => {
-            const tabExams = tabKey === 'all' ? allExams : (MOCK_EXAMS[tabKey] || []);
-            if (activeTab !== tabKey && activeTab !== 'all') return null;
-            return tabExams.map((exam) => {
+          {filtered.length === 0 ? (
+            <View style={styles.empty}>
+              <Ionicons name="folder-open-outline" size={48} color={Colors.gray30} />
+              <Text style={styles.emptyText}>Không có đề thi nào</Text>
+            </View>
+          ) : (
+            filtered.map((exam) => {
               const status = STATUS_STYLES[exam.status];
               return (
                 <TouchableOpacity
@@ -125,15 +128,12 @@ export const KhoDeDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                   <TouchableOpacity style={styles.moreBtn} onPress={() => {}}>
                     <Ionicons name="ellipsis-horizontal" size={20} color="#6C757D" />
                   </TouchableOpacity>
-
                   <View style={[styles.subjectBadge, { backgroundColor: exam.subjectColor }]}>
                     <Ionicons name="calculator-outline" size={22} color="#6C757D" />
                   </View>
-
                   <Text style={styles.examTitle}>{exam.title}</Text>
                   <Text style={styles.examSubject}>{exam.subject}</Text>
                   <Text style={styles.examDate}>{exam.date}</Text>
-
                   <View style={styles.examBottom}>
                     <View style={[styles.statusChip, { backgroundColor: status.bg }]}>
                       <View style={[styles.statusDot, { backgroundColor: status.dot }]} />
@@ -141,7 +141,6 @@ export const KhoDeDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                         {STATUS_LABELS[exam.status]}
                       </Text>
                     </View>
-
                     {exam.studentCount > 0 && (
                       <View style={styles.studentCountWrap}>
                         <Ionicons name="people-outline" size={18} color="#6C757D" />
@@ -151,14 +150,7 @@ export const KhoDeDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                   </View>
                 </TouchableOpacity>
               );
-            });
-          })}
-
-          {filtered.length === 0 && (
-            <View style={styles.empty}>
-              <Ionicons name="folder-open-outline" size={48} color={Colors.gray30} />
-              <Text style={styles.emptyText}>Không có đề thi nào</Text>
-            </View>
+            })
           )}
         </View>
 

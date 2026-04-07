@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
@@ -39,7 +39,10 @@ export const ThongKeScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.headerTitle}>Thống kê lớp 6A1</Text>
         </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.iconBtn}>
+          <TouchableOpacity
+            style={styles.iconBtn}
+            onPress={() => Alert.alert('Thông báo', 'Chức năng đang phát triển')}
+          >
             <Ionicons name="filter-outline" size={20} color={Colors.textPrimary} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconBtn}>
@@ -71,7 +74,10 @@ export const ThongKeScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.chartCard}>
           <View style={styles.chartHeader}>
             <Text style={styles.chartTitle}>Phân phối điểm số</Text>
-            <TouchableOpacity style={styles.detailBtn}>
+            <TouchableOpacity
+              style={styles.detailBtn}
+              onPress={() => Alert.alert('Thông báo', 'Chức năng đang phát triển')}
+            >
               <Text style={styles.detailBtnText}>Chi tiết</Text>
               <Ionicons name="chevron-forward" size={14} color={Colors.primary} />
             </TouchableOpacity>
@@ -104,7 +110,10 @@ export const ThongKeScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.listSection}>
           <View style={styles.listHeader}>
             <Text style={styles.listTitle}>Danh sách học sinh</Text>
-            <TouchableOpacity style={styles.sortBtn}>
+            <TouchableOpacity
+              style={styles.sortBtn}
+              onPress={() => Alert.alert('Thông báo', 'Chức năng đang phát triển')}
+            >
               <Ionicons name="swap-vertical" size={14} color="#475569" />
               <Text style={styles.sortBtnText}>Điểm cao nhất</Text>
             </TouchableOpacity>
@@ -149,7 +158,10 @@ export const ThongKeScreen: React.FC<Props> = ({ navigation }) => {
           </View>
 
           {/* View all */}
-          <TouchableOpacity style={styles.viewAllBtn}>
+          <TouchableOpacity
+            style={styles.viewAllBtn}
+            onPress={() => Alert.alert('Thông báo', 'Danh sách đầy đủ đang được tải...')}
+          >
             <Text style={styles.viewAllText}>Xem tất cả 45 học sinh</Text>
             <Ionicons name="chevron-down" size={16} color={Colors.textSecondary} />
           </TouchableOpacity>
@@ -159,7 +171,10 @@ export const ThongKeScreen: React.FC<Props> = ({ navigation }) => {
       </ScrollView>
 
       {/* Export FAB */}
-      <TouchableOpacity style={styles.exportFab}>
+      <TouchableOpacity
+        style={styles.exportFab}
+        onPress={() => Alert.alert('Thông báo', 'Báo cáo đang được xuất...')}
+      >
         <Ionicons name="download-outline" size={16} color={Colors.white} />
         <Text style={styles.exportFabText}>Xuất báo cáo</Text>
       </TouchableOpacity>
