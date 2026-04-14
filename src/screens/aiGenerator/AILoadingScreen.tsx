@@ -101,7 +101,7 @@ export const AILoadingScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Editorial Intelligence</Text>
+        <Text style={styles.headerTitle}>AI Biên soạn đề thi</Text>
         <View style={styles.profileBtn}>
           <Ionicons name="menu-outline" size={22} color="#047857" />
         </View>
