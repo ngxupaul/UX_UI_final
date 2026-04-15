@@ -1,100 +1,108 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
-import { CommonActions } from '@react-navigation/native';
-import { Colors } from '../../theme';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../types';
+import React, { useEffect, useRef } from "react";
+import { Animated, StyleSheet, Text, View } from "react-native";
+import { CommonActions } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Colors } from "../../theme";
+import type { RootStackParamList } from "../../types";
 
 interface Props {
-  navigation: NativeStackNavigationProp<RootStackParamList, 'Splash'>;
+  navigation: NativeStackNavigationProp<RootStackParamList, "Splash">;
 }
 
 export const SplashScreen: React.FC<Props> = ({ navigation }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
-  const spinAnim = useRef(new Animated.Value(0)).current;
+  const riseAnim = useRef(new Animated.Value(18)).current;
+  const dotAnim = useRef(new Animated.Value(0.75)).current;
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 600,
+        duration: 550,
         useNativeDriver: true,
       }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        friction: 6,
-        tension: 40,
+      Animated.spring(riseAnim, {
+        toValue: 0,
+        speed: 14,
+        bounciness: 5,
         useNativeDriver: true,
       }),
     ]).start();
 
-    const spin = Animated.loop(
-      Animated.timing(spinAnim, {
-        toValue: 1,
-        duration: 1200,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(dotAnim, {
+          toValue: 1,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+        Animated.timing(dotAnim, {
+          toValue: 0.75,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+      ])
     );
-    spin.start();
+    pulse.start();
 
     const timer = setTimeout(() => {
       Animated.timing(fadeAnim, {
         toValue: 0,
-        duration: 400,
+        duration: 320,
         useNativeDriver: true,
       }).start(() => {
         navigation.dispatch(
           CommonActions.reset({
             index: 0,
-            routes: [{ name: 'Onboarding' }],
+            routes: [{ name: "Onboarding" }],
           })
         );
       });
-    }, 3000);
+    }, 2600);
 
     return () => {
       clearTimeout(timer);
-      spin.stop();
+      pulse.stop();
     };
-  }, []);
-
-  const spinInterpolate = spinAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
+  }, [dotAnim, fadeAnim, navigation, riseAnim]);
 
   return (
     <View style={styles.container}>
       <Animated.View
-        style={[styles.heroContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}
+        style={[
+          styles.mainGroup,
+          {
+            opacity: fadeAnim,
+            transform: [{ translateY: riseAnim }],
+          },
+        ]}
       >
-        <View style={styles.heroBlob} />
-        <View style={styles.logoMark}>
-          <Text style={styles.logoText}>F</Text>
+        <View style={styles.logoGroup}>
+          <View style={styles.logoBadge}>
+            <Text style={styles.logoEmoji}>🐱</Text>
+          </View>
+          <Text style={styles.logoWordmark}>Quizken</Text>
         </View>
-      </Animated.View>
 
-      <Animated.View style={[styles.titleContainer, { opacity: fadeAnim }]}>
         <Text style={styles.title}>
-          Tạo bài kiểm tra với{' '}
-          <Text style={styles.titleAI}>AI</Text>
+          Tạo bài kiểm tra với <Text style={styles.titleAccent}>AI</Text>
         </Text>
-      </Animated.View>
 
-      <Animated.View style={[styles.subtitleContainer, { opacity: fadeAnim }]}>
         <Text style={styles.subtitle}>
-          Giải phóng tư duy khỏi những thao tác thủ công, hãy để AI gánh
-          vác quy trình soạn đề, giúp bạn dành trọn tâm huyết cho việc truyền
-          cảm hứng
+          Giải phóng tư duy khỏi những thao tác thủ công, hãy để AI gánh vác
+          quy trình soạn đề, giúp bạn dành trọn tâm huyết cho việc truyền cảm
+          hứng
         </Text>
-      </Animated.View>
 
-      <Animated.View
-        style={[styles.spinnerContainer, { opacity: fadeAnim, transform: [{ rotate: spinInterpolate }] }]}
-      >
-        <View style={styles.spinner} />
+        <Animated.View
+          style={[
+            styles.loadingDot,
+            {
+              opacity: dotAnim,
+              transform: [{ scale: dotAnim }],
+            },
+          ]}
+        />
       </Animated.View>
     </View>
   );
@@ -104,77 +112,72 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
     paddingHorizontal: 24,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  heroBlob: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: 'rgba(33, 196, 93, 0.15)',
-    position: 'absolute',
+  mainGroup: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingBottom: 36,
   },
-  heroContainer: {
-    width: 140,
-    height: 140,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 32,
+  logoGroup: {
+    alignItems: "center",
+    marginBottom: 112,
   },
-  logoMark: {
-    width: 100,
-    height: 100,
-    borderRadius: 28,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: 'rgba(33,196,93,0.3)',
+  logoBadge: {
+    width: 136,
+    height: 136,
+    borderRadius: 68,
+    backgroundColor: "#F7FAF7",
+    borderWidth: 1,
+    borderColor: "#E8F5EA",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "rgba(15,23,42,0.08)",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 1,
-    shadowRadius: 24,
+    shadowRadius: 18,
     elevation: 4,
+    marginBottom: 8,
   },
-  logoText: {
-    fontSize: 48,
-    fontWeight: '800',
-    color: Colors.primary,
+  logoEmoji: {
+    fontSize: 76,
+    lineHeight: 86,
   },
-  titleContainer: {
-    marginBottom: 16,
-    alignItems: 'center',
+  logoWordmark: {
+    fontSize: 28,
+    lineHeight: 32,
+    fontWeight: "800",
+    color: Colors.textPrimary,
+    letterSpacing: -0.7,
   },
   title: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#1f2937',
-    textAlign: 'center',
-    letterSpacing: -0.5,
+    fontSize: 28,
+    lineHeight: 36,
+    fontWeight: "800",
+    textAlign: "center",
+    color: Colors.textPrimary,
+    letterSpacing: -0.7,
+    marginBottom: 28,
   },
-  titleAI: {
+  titleAccent: {
     color: Colors.primary,
   },
-  subtitleContainer: {
-    paddingHorizontal: 8,
-    marginBottom: 48,
-  },
   subtitle: {
-    fontSize: 15,
-    color: '#7b7b7b',
-    textAlign: 'center',
-    lineHeight: 25,
-    fontWeight: '500',
+    maxWidth: 384,
+    fontSize: 16,
+    lineHeight: 26,
+    fontWeight: "500",
+    textAlign: "center",
+    color: "#7B7B7B",
+    marginBottom: 106,
   },
-  spinnerContainer: {
-    position: 'absolute',
-    bottom: 80,
-  },
-  spinner: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 3,
-    borderColor: Colors.gray30,
-    borderTopColor: Colors.primary,
+  loadingDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: Colors.primary,
   },
 });
