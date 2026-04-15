@@ -8,6 +8,8 @@
 
 Flazers is a Vietnamese-language mobile app for exam management. Teachers can create exam banks, write questions manually or with AI assistance, distribute exams to classes, and view analytics. Students can take exams and see results.
 
+Figma reference map: see [`docs/figma-page-map.md`](./docs/figma-page-map.md) for the latest page sorting by `teacher`, `student`, `shared`, and `draft` screens.
+
 ---
 
 ## 🚀 Quick Start
@@ -62,8 +64,9 @@ No backend required — login uses hardcoded dummy accounts.
 |------|-------|----------|
 | 👑 **Admin** | `admin@flazers.vn` | `admin123` |
 | 🧑‍🏫 **Teacher** | `giaovien@flazers.vn` | `teacher123` |
+| 🧑‍🎓 **Student** | `hocsinh@flazers.vn` | `student123` |
 
-On the login screen, tap **Admin** or **Giáo viên** to auto-fill credentials.
+The login screen now defaults to the **Student** demo account and also provides quick-fill chips for **Học sinh**, **Giáo viên**, and **Admin**.
 
 ---
 

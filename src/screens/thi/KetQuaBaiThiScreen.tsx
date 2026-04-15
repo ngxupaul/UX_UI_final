@@ -1,304 +1,379 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../theme';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { DashboardStackParamList } from '../../types';
+import React from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Colors } from "../../theme";
+import type { DashboardStackParamList } from "../../types";
 
 interface Props {
   navigation: NativeStackNavigationProp<DashboardStackParamList>;
 }
 
-export const KetQuaBaiThiScreen: React.FC<Props> = ({ navigation }) => {
-  const score = 8.5;
-  const total = 10;
-  const correct = 17;
-  const wrong = 2;
-  const skipped = 1;
-  const percentage = Math.round((score / total) * 100);
+const STATS = [
+  {
+    id: "correct",
+    value: 4,
+    label: "Đúng",
+    tint: "#EEFDF5",
+    valueColor: "#16A34A",
+    labelColor: "rgba(22,163,74,0.7)",
+    icon: "checkmark-circle-outline" as const,
+  },
+  {
+    id: "wrong",
+    value: 1,
+    label: "Sai",
+    tint: "#FFF5F5",
+    valueColor: "#BE123C",
+    labelColor: "rgba(225,29,72,0.7)",
+    icon: "close-circle-outline" as const,
+  },
+  {
+    id: "skipped",
+    value: 0,
+    label: "Bỏ qua",
+    tint: "#F8FAFC",
+    valueColor: "#334155",
+    labelColor: "rgba(100,116,139,0.7)",
+    icon: "help-circle-outline" as const,
+  },
+];
 
-  const gradeColor = '#16A34A';
+const BOTTOM_TABS = [
+  { id: "home", label: "Trang chủ", icon: "home-outline" as const },
+  { id: "exam", label: "Bài thi", icon: "document-text-outline" as const, active: true },
+  { id: "notice", label: "Thông báo", icon: "notifications-outline" as const },
+  { id: "profile", label: "Cá nhân", icon: "person-outline" as const },
+];
+
+export const KetQuaBaiThiScreen: React.FC<Props> = ({ navigation }) => {
+  const score = 8;
+  const total = 10;
 
   return (
     <View style={styles.wrapper}>
-      {/* Status Bar */}
-      <SafeAreaView style={styles.statusBarArea} edges={['top']}>
-        <View style={styles.statusBar}>
-          <Text style={styles.statusTime}>12:34</Text>
-          <View style={styles.statusIcons}>
-            <View style={styles.wifiIcon} />
-            <View style={styles.signalIcon} />
-            <View style={styles.batteryIcon} />
-          </View>
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.headerIconBtn}
+          >
+            <Ionicons name="arrow-back" size={22} color="#334155" />
+          </TouchableOpacity>
+
+          <Text style={styles.headerTitle}>Kết quả bài thi</Text>
+
+          <TouchableOpacity style={styles.headerIconBtn}>
+            <Ionicons name="share-social-outline" size={20} color="#334155" />
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
 
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.popToTop()}>
-          <Ionicons name="chevron-back" size={22} color={Colors.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Kết quả bài thi</Text>
-        <TouchableOpacity>
-          <Ionicons name="ellipsis-horizontal" size={22} color={Colors.textPrimary} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Scrollable content */}
-      <View style={styles.scrollWrapper}>
-        {/* Score Circle */}
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.scoreSection}>
-          {/* Glow */}
           <View style={styles.scoreGlow} />
-          {/* Circle */}
-          <View style={styles.scoreCircle}>
-            <Text style={[styles.scoreValue, { color: gradeColor }]}>{score}</Text>
+
+          <View style={styles.scoreRing}>
+            <Text style={styles.scoreValue}>{score}</Text>
             <Text style={styles.scoreTotal}>/{total}</Text>
           </View>
-          <Text style={styles.scoreLabel}>Tuyệt vời!</Text>
-          <Text style={styles.scoreSubtext}>
+
+          <Text style={styles.resultTitle}>Tuyệt vời!</Text>
+          <Text style={styles.resultSubtitle}>
             Bạn đã nắm vững kiến thức cơ bản. Hãy tiếp tục phát huy nhé!
           </Text>
         </View>
 
-        {/* Stats Row */}
         <View style={styles.statsRow}>
-          <View style={[styles.statCard, styles.statCardGreen]}>
-            <Text style={styles.statValue}>17</Text>
-            <Text style={styles.statLabel}>Đúng</Text>
-          </View>
-          <View style={[styles.statCard, styles.statCardRed]}>
-            <Text style={styles.statValue}>2</Text>
-            <Text style={styles.statLabel}>Sai</Text>
-          </View>
-          <View style={[styles.statCard, styles.statCardGray]}>
-            <Text style={styles.statValue}>1</Text>
-            <Text style={styles.statLabel}>Bỏ qua</Text>
-          </View>
+          {STATS.map((stat) => (
+            <View
+              key={stat.id}
+              style={[styles.statCard, { backgroundColor: stat.tint }]}
+            >
+              <View style={styles.statIconWrap}>
+                <Ionicons name={stat.icon} size={18} color={stat.valueColor} />
+              </View>
+              <Text style={[styles.statValue, { color: stat.valueColor }]}>
+                {stat.value}
+              </Text>
+              <Text style={[styles.statLabel, { color: stat.labelColor }]}>
+                {stat.label}
+              </Text>
+            </View>
+          ))}
         </View>
 
-        {/* Detail Section */}
-        <View style={styles.detailSection}>
-          <View style={styles.detailHeader}>
-            <Text style={styles.detailTitle}>Chi tiết điểm số</Text>
-            <TouchableOpacity>
-              <Text style={styles.detailLink}>Xem biểu đồ</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Subject breakdown */}
-          <View style={styles.breakdownCard}>
-            <View style={styles.breakdownRow}>
-              <Text style={styles.breakdownSubject}>Đại số</Text>
-              <Text style={styles.breakdownScore}>8/10</Text>
-              <View style={styles.breakdownBarTrack}>
-                <View style={[styles.breakdownBarFill, { width: '80%' }]} />
-              </View>
-            </View>
-            <View style={styles.breakdownRow}>
-              <Text style={styles.breakdownSubject}>Hình học</Text>
-              <Text style={styles.breakdownScore}>9/10</Text>
-              <View style={styles.breakdownBarTrack}>
-                <View style={[styles.breakdownBarFill, styles.breakdownBarFillTeal, { width: '90%' }]} />
-              </View>
-            </View>
-          </View>
+        <View style={styles.detailHeader}>
+          <Text style={styles.detailTitle}>Chi tiết điểm số</Text>
+          <TouchableOpacity>
+            <Text style={styles.detailLink}>Xem biểu đồ</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Actions */}
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.btnPrimary}>
-            <Ionicons name="document-text-outline" size={18} color={Colors.white} />
-            <Text style={styles.btnPrimaryText}>Xem lại bài làm</Text>
+          <TouchableOpacity style={styles.reviewBtn}>
+            <Ionicons name="eye-outline" size={20} color={Colors.white} />
+            <Text style={styles.reviewBtnText}>Xem lại bài làm</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.btnOutline}
-            onPress={() => navigation.popToTop()}
-          >
-            <Text style={styles.btnOutlineText}>Về trang chủ</Text>
-          </TouchableOpacity>
-        </View>
 
-        {/* Bottom Nav placeholder */}
-        <View style={styles.bottomNavBar}>
-          <TouchableOpacity style={styles.navTab}>
-            <Ionicons name="home-outline" size={22} color={Colors.textSecondary} />
-            <Text style={styles.navTabText}>Trang chủ</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.navTab, styles.navTabActive]}>
-            <View style={styles.navTabActiveDot} />
-            <Ionicons name="document-text" size={22} color={Colors.primary} />
-            <Text style={[styles.navTabText, styles.navTabTextActive]}>Bài thi</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navTab}>
-            <Ionicons name="notifications-outline" size={22} color={Colors.textSecondary} />
-            <Text style={styles.navTabText}>Thông báo</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navTab}>
-            <Ionicons name="person-outline" size={22} color={Colors.textSecondary} />
-            <Text style={styles.navTabText}>Cá nhân</Text>
+          <TouchableOpacity
+            onPress={() => navigation.popToTop()}
+            style={styles.homeBtn}
+          >
+            <Text style={styles.homeBtnText}>Về trang chủ</Text>
           </TouchableOpacity>
         </View>
+      </ScrollView>
+
+      <View style={styles.bottomNav}>
+        {BOTTOM_TABS.map((tab) => (
+          <TouchableOpacity key={tab.id} style={styles.bottomNavItem}>
+            <Ionicons
+              name={tab.icon}
+              size={20}
+              color={tab.active ? "#22C55E" : "#94A3B8"}
+            />
+            <Text
+              style={[
+                styles.bottomNavLabel,
+                tab.active && styles.bottomNavLabelActive,
+              ]}
+            >
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  wrapper: { flex: 1, backgroundColor: Colors.white },
-  statusBarArea: { backgroundColor: Colors.white },
-  statusBar: {
-    height: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 70,
+  wrapper: {
+    flex: 1,
+    backgroundColor: Colors.white,
   },
-  statusTime: { fontSize: 15, fontWeight: '600', color: '#000' },
-  statusIcons: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  wifiIcon: { width: 14, height: 14, backgroundColor: '#000', borderRadius: 3 },
-  signalIcon: { width: 10, height: 14, backgroundColor: '#000', borderRadius: 2 },
-  batteryIcon: { width: 22, height: 10, borderWidth: 1, borderColor: '#000', borderRadius: 2 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+  safeArea: {
+    backgroundColor: "rgba(255,255,255,0.92)",
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: "#F1F5F9",
   },
-  headerTitle: { fontSize: 17, fontWeight: '600', color: Colors.textPrimary },
-  scrollWrapper: { flex: 1 },
-  scoreSection: { alignItems: 'center', paddingVertical: 32 },
+  header: {
+    height: 56,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerIconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerTitle: {
+    fontSize: 18,
+    lineHeight: 28,
+    fontWeight: "700",
+    color: "#1E293B",
+    letterSpacing: -0.45,
+  },
+  scroll: {
+    paddingBottom: 24,
+  },
+  scoreSection: {
+    alignItems: "center",
+    paddingTop: 32,
+    paddingBottom: 24,
+  },
   scoreGlow: {
-    position: 'absolute',
-    top: 0,
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: 'rgba(74,222,128,0.1)',
-    top: 16,
+    position: "absolute",
+    top: 32,
+    width: 208,
+    height: 208,
+    borderRadius: 104,
+    backgroundColor: "rgba(74,222,128,0.10)",
+    shadowColor: "rgba(74,222,128,0.18)",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 32,
   },
-  scoreCircle: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    borderWidth: 8,
-    borderColor: '#D1FAE5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    marginBottom: 16,
+  scoreRing: {
+    width: 208,
+    height: 208,
+    borderRadius: 104,
+    borderWidth: 12,
+    borderColor: "#4ADE80",
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    marginBottom: 24,
   },
-  scoreValue: { fontSize: 56, fontWeight: '800', letterSpacing: -2 },
-  scoreTotal: { fontSize: 24, fontWeight: '600', color: '#94A3B8', marginTop: 10 },
-  scoreLabel: {
+  scoreValue: {
+    fontSize: 60,
+    lineHeight: 60,
+    fontWeight: "800",
+    color: "#22C55E",
+    letterSpacing: -3,
+  },
+  scoreTotal: {
+    marginTop: 18,
+    fontSize: 20,
+    lineHeight: 28,
+    fontWeight: "500",
+    color: "#94A3B8",
+  },
+  resultTitle: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#16A34A',
-    marginBottom: 6,
+    lineHeight: 32,
+    fontWeight: "700",
+    color: "#1E293B",
+    marginBottom: 8,
   },
-  scoreSubtext: {
+  resultSubtitle: {
+    maxWidth: 240,
     fontSize: 14,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    paddingHorizontal: 32,
-    lineHeight: 22,
+    lineHeight: 23,
+    color: "#64748B",
+    textAlign: "center",
   },
   statsRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
+    flexDirection: "row",
     gap: 12,
+    paddingHorizontal: 16,
     marginBottom: 24,
   },
   statCard: {
     flex: 1,
+    minHeight: 130,
     borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
     padding: 17,
-    alignItems: 'center',
+    shadowColor: "rgba(0,0,0,0.05)",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  statCardGreen: { backgroundColor: '#EEFCF6', borderWidth: 1, borderColor: 'rgba(220,252,231,0.5)' },
-  statCardRed: { backgroundColor: '#FEF2F2', borderWidth: 1, borderColor: 'rgba(254,226,226,0.5)' },
-  statCardGray: { backgroundColor: '#F8FAFC', borderWidth: 1, borderColor: '#F1F5F9' },
-  statValue: { fontSize: 24, fontWeight: '700', color: Colors.textPrimary, marginBottom: 4 },
+  statIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+  statValue: {
+    fontSize: 24,
+    lineHeight: 32,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
   statLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#94A3B8',
-    textTransform: 'uppercase',
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "600",
+    textTransform: "uppercase",
     letterSpacing: 0.3,
   },
-  detailSection: { paddingHorizontal: 20 },
   detailHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 16,
   },
-  detailTitle: { fontSize: 17, fontWeight: '600', color: Colors.textPrimary },
-  detailLink: { fontSize: 14, color: Colors.primary, fontWeight: '600' },
-  breakdownCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 16,
-    padding: 16,
-    gap: 16,
+  detailTitle: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: "600",
+    color: "#1E293B",
   },
-  breakdownRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  breakdownSubject: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary, width: 80 },
-  breakdownScore: { fontSize: 14, fontWeight: '700', color: Colors.textPrimary, width: 40 },
-  breakdownBarTrack: {
-    flex: 1,
-    height: 6,
-    backgroundColor: Colors.gray20,
-    borderRadius: 3,
-    overflow: 'hidden',
+  detailLink: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "500",
+    color: "#22C55E",
   },
-  breakdownBarFill: { height: '100%', backgroundColor: Colors.success, borderRadius: 3 },
-  breakdownBarFillTeal: { backgroundColor: '#14B8A6' },
-  actions: { paddingHorizontal: 20, paddingTop: 24, gap: 12 },
-  btnPrimary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+  actions: {
+    paddingHorizontal: 16,
+    gap: 12,
+    paddingBottom: 12,
+  },
+  reviewBtn: {
+    height: 56,
+    borderRadius: 12,
+    backgroundColor: "#22C55E",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
-    backgroundColor: Colors.primary,
-    height: 52,
-    borderRadius: 14,
-    shadowColor: 'rgba(33,196,93,0.3)',
-    shadowOffset: { width: 0, height: 10 },
+    shadowColor: "rgba(34,197,94,0.40)",
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 1,
-    shadowRadius: 15,
-    elevation: 4,
+    shadowRadius: 20,
+    elevation: 5,
   },
-  btnPrimaryText: { fontSize: 15, fontWeight: '700', color: Colors.white },
-  btnOutline: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  reviewBtnText: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: "600",
+    color: Colors.white,
+  },
+  homeBtn: {
+    height: 56,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
     backgroundColor: Colors.white,
-    height: 52,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "rgba(0,0,0,0.05)",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  btnOutlineText: { fontSize: 15, fontWeight: '600', color: Colors.textPrimary },
-  bottomNavBar: {
-    flexDirection: 'row',
+  homeBtnText: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: "600",
+    color: "#334155",
+  },
+  bottomNav: {
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
-    marginTop: 24,
+    borderTopColor: "#F1F5F9",
+    backgroundColor: Colors.white,
+    paddingTop: 9,
+    paddingBottom: 24,
+    paddingHorizontal: 16,
+    flexDirection: "row",
   },
-  navTab: { flex: 1, alignItems: 'center', paddingVertical: 12, gap: 4 },
-  navTabActive: {},
-  navTabActiveDot: {
-    position: 'absolute',
-    top: 4,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.primary,
+  bottomNavItem: {
+    flex: 1,
+    alignItems: "center",
+    gap: 4,
   },
-  navTabText: { fontSize: 10, color: Colors.textSecondary, fontWeight: '500' },
-  navTabTextActive: { color: Colors.primary },
+  bottomNavLabel: {
+    fontSize: 10,
+    lineHeight: 15,
+    fontWeight: "500",
+    color: "#94A3B8",
+  },
+  bottomNavLabelActive: {
+    color: "#22C55E",
+  },
 });
