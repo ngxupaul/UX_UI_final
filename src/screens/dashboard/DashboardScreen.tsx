@@ -89,43 +89,75 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   if (isStudent) {
     const studentStats = [
       {
-        label: "Bài thi được giao",
-        value: String(studentExams.length),
-        icon: "reader-outline" as const,
-        color: Colors.primary,
-      },
-      {
-        label: "Đã hoàn thành",
-        value: String(studentResults.length),
+        label: "Bài thi",
+        value: "12",
         icon: "checkmark-circle-outline" as const,
-        color: Colors.success,
       },
       {
-        label: "Điểm trung bình",
-        value: studentAverage,
-        icon: "bar-chart-outline" as const,
-        color: Colors.info,
+        label: "Trung bình",
+        value: "8.5",
+        icon: "star" as const,
+        highlighted: true,
+      },
+      {
+        label: "Thứ hạng",
+        value: "#04",
+        icon: "trophy-outline" as const,
+      },
+    ];
+
+    const studentExamCards = [
+      {
+        id: "student-exam-1",
+        subject: "Địa lý",
+        subjectBg: "rgba(0,110,47,0.1)",
+        subjectColor: "#006E2F",
+        title: "Kiểm tra 15 phút - Chương 1",
+        duration: "15 ph",
+        crowd: "+14",
+        action: () =>
+          navigation.navigate("HocSinhLamBai", {
+            examId: upcomingStudentExam?.id ?? "exam-1",
+          }),
+      },
+      {
+        id: "student-exam-2",
+        subject: "Vật lý",
+        subjectBg: "rgba(159,63,55,0.1)",
+        subjectColor: "#9F3F37",
+        title: "Đề luyện tập Chương 3: Quang học",
+        duration: "60 ph",
+        crowd: "+5",
+        action: () =>
+          navigation.navigate("HocSinhLamBai", {
+            examId: studentExams[1]?.id ?? upcomingStudentExam?.id ?? "exam-1",
+          }),
       },
     ];
 
     return (
       <SafeAreaView style={styles.container} edges={["top"]}>
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.teacherScroll}
+          contentContainerStyle={styles.studentContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.studentHeader}>
             <View style={styles.studentHeaderLeft}>
-              <Avatar name={currentUser.name} size={48} />
+              <View style={styles.studentAvatarWrap}>
+                <Avatar name={currentUser.name} size={40} />
+              </View>
               <View>
                 <Text style={styles.studentGreeting}>Xin chào,</Text>
                 <Text style={styles.studentName}>{currentUser.name}</Text>
-                <Text style={styles.studentRole}>{currentUser.title}</Text>
               </View>
             </View>
 
-            <TouchableOpacity style={styles.iconButton} activeOpacity={0.85}>
+            <TouchableOpacity style={styles.studentBellButton} activeOpacity={0.85}>
               <Ionicons
                 name="notifications-outline"
                 size={22}
-                color={Colors.textPrimary}
+                color="#006E2F"
               />
             </TouchableOpacity>
           </View>
@@ -137,9 +169,9 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             style={styles.studentHero}
           >
             <View style={styles.studentHeroText}>
-              <Text style={styles.studentHeroTitle}>Sẵn sàng cho bài thi hôm nay</Text>
+              <Text style={styles.studentHeroTitle}>Tự luyện tập với Ai</Text>
               <Text style={styles.studentHeroSubtitle}>
-                Theo dõi bài thi được giao và xem kết quả mới nhất của bạn.
+                Cải thiện kiến thức với lộ trình cá nhân hóa
               </Text>
               <TouchableOpacity
                 onPress={() =>
@@ -149,22 +181,30 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 }
                 style={styles.studentHeroButton}
               >
-                <Ionicons name="play-outline" size={18} color={Colors.white} />
-                <Text style={styles.studentHeroButtonText}>Vào bài thi</Text>
+                <Ionicons name="sparkles-outline" size={18} color={Colors.white} />
+                <Text style={styles.studentHeroButtonText}>Bắt đầu ngay</Text>
               </TouchableOpacity>
+            </View>
+            <View style={styles.studentHeroIconWrap}>
+              <Ionicons name="bulb-outline" size={60} color={Colors.white} />
             </View>
           </LinearGradient>
 
           <View style={styles.studentStatsRow}>
             {studentStats.map((item) => (
-              <View key={item.label} style={styles.studentStatCard}>
-                <View
-                  style={[
-                    styles.studentStatIconWrap,
-                    { backgroundColor: `${item.color}20` },
-                  ]}
-                >
-                  <Ionicons name={item.icon} size={18} color={item.color} />
+              <View
+                key={item.label}
+                style={[
+                  styles.studentStatCard,
+                  item.highlighted && styles.studentStatCardActive,
+                ]}
+              >
+                <View style={styles.studentStatIconWrap}>
+                  <Ionicons
+                    name={item.icon}
+                    size={20}
+                    color={item.highlighted ? "#006E2F" : "#161D16"}
+                  />
                 </View>
                 <Text style={styles.studentStatValue}>{item.value}</Text>
                 <Text style={styles.studentStatLabel}>{item.label}</Text>
@@ -172,52 +212,105 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             ))}
           </View>
 
-          <View style={styles.studentSectionCard}>
-            <View style={styles.teacherSectionHeader}>
-              <Text style={styles.teacherSectionTitle}>Bài thi và kết quả</Text>
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate("KetQuaBaiThi", {
-                    examId: latestResult?.examId ?? "exam-1",
-                  })
-                }
-              >
-                <Text style={styles.teacherSectionLink}>Xem kết quả</Text>
-              </TouchableOpacity>
-            </View>
-
+          <View style={styles.studentResultSection}>
+            <Text style={styles.studentSectionTitle}>Kết quả gần đây</Text>
             <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("HocSinhLamBai", {
-                  examId: upcomingStudentExam?.id ?? "exam-1",
-                })
-              }
-              style={styles.studentActionCard}
-            >
-              <Text style={styles.studentActionTitle}>
-                {upcomingStudentExam?.title ?? "Bài thi Vật lý dao động"}
-              </Text>
-              <Text style={styles.studentActionSubtitle}>
-                {upcomingStudentExam?.subject ?? "Vật lý 12"} •{" "}
-                {upcomingStudentExam?.duration ?? 15} phút
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
+              style={styles.studentResultCard}
+              activeOpacity={0.85}
               onPress={() =>
                 navigation.navigate("KetQuaBaiThi", {
                   examId: latestResult?.examId ?? "exam-1",
                 })
               }
-              style={styles.studentActionCard}
             >
-              <Text style={styles.studentActionTitle}>
-                Kết quả gần nhất: {latestResult?.score ?? 8}/{latestResult?.total ?? 10}
-              </Text>
-              <Text style={styles.studentActionSubtitle}>
-                {latestResult?.correct ?? 4} câu đúng • {latestResult?.wrong ?? 1} câu sai
-              </Text>
+              <View style={styles.studentMiniRing}>
+                <View style={styles.studentMiniRingBase} />
+                <View style={styles.studentMiniRingArc} />
+                <View style={styles.studentMiniRingInner}>
+                  <Text style={styles.studentMiniRingValue}>
+                    {latestResult ? latestResult.score.toFixed(1) : "9.0"}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.studentResultContent}>
+                <Text style={styles.studentResultTitle}>
+                  Kiểm tra Toán học kì I
+                </Text>
+                <Text style={styles.studentResultSubtitle}>
+                  Hoàn thành: 2 giờ trước
+                </Text>
+                <View style={styles.studentProgressTrack}>
+                  <View style={styles.studentProgressFill} />
+                </View>
+              </View>
+
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color="#3D4A3D"
+                style={styles.studentResultChevron}
+              />
             </TouchableOpacity>
+          </View>
+
+          <View style={styles.studentExamSection}>
+            <View style={styles.teacherSectionHeader}>
+              <Text style={styles.studentSectionTitle}>Bài thi cần làm</Text>
+              <TouchableOpacity>
+                <Text style={styles.studentSectionLink}>XEM TẤT CẢ</Text>
+              </TouchableOpacity>
+            </View>
+
+            {studentExamCards.map((exam) => (
+              <View key={exam.id} style={styles.studentExamCard}>
+                <View style={styles.studentExamTop}>
+                  <View
+                    style={[
+                      styles.studentSubjectPill,
+                      { backgroundColor: exam.subjectBg },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.studentSubjectText,
+                        { color: exam.subjectColor },
+                      ]}
+                    >
+                      {exam.subject}
+                    </Text>
+                  </View>
+                  <View style={styles.studentDurationWrap}>
+                    <Ionicons name="time-outline" size={14} color="#3D4A3D" />
+                    <Text style={styles.studentDurationText}>{exam.duration}</Text>
+                  </View>
+                </View>
+
+                <Text style={styles.studentExamTitle}>{exam.title}</Text>
+
+                <View style={styles.studentExamFooter}>
+                  <View style={styles.studentAvatarStack}>
+                    <View style={[styles.studentExamAvatar, { left: 0 }]}>
+                      <Text style={styles.studentExamAvatarText}>L</Text>
+                    </View>
+                    <View style={[styles.studentExamAvatar, { left: 14 }]}>
+                      <Text style={styles.studentExamAvatarText}>B</Text>
+                    </View>
+                    <View style={[styles.studentExamAvatarCount, { left: 28 }]}>
+                      <Text style={styles.studentExamAvatarCountText}>{exam.crowd}</Text>
+                    </View>
+                  </View>
+
+                  <TouchableOpacity
+                    style={styles.studentExamButton}
+                    activeOpacity={0.85}
+                    onPress={exam.action}
+                  >
+                    <Text style={styles.studentExamButtonText}>Làm bài</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
           </View>
 
           <View style={styles.bottomSpacer} />
@@ -376,124 +469,365 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 16,
-    backgroundColor: Colors.white,
+    marginBottom: 12,
+    paddingHorizontal: 14,
   },
   studentHeaderLeft: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
   },
+  studentContent: {
+    paddingHorizontal: 10,
+    paddingTop: 8,
+    paddingBottom: 28,
+    gap: 32,
+  },
+  studentAvatarWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F8FAF8",
+    shadowColor: "#006E2F",
+    shadowOpacity: 0.1,
+    shadowRadius: 0,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 1,
+    overflow: "hidden",
+  },
+  studentBellButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+  },
   studentGreeting: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    fontWeight: "500",
+    fontSize: 12,
+    lineHeight: 16,
+    color: "#3D4A3D",
+    fontWeight: "400",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
   },
   studentName: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: Colors.textPrimary,
-  },
-  studentRole: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    marginTop: 2,
+    fontSize: 18,
+    lineHeight: 28,
+    fontWeight: "800",
+    color: "#006E2F",
+    letterSpacing: -0.4,
   },
   studentHero: {
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 18,
-    padding: 20,
+    minHeight: 178,
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 22,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.2,
+    shadowRadius: 15,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 5,
   },
   studentHeroText: {
-    gap: 8,
+    flex: 1,
+    paddingRight: 12,
   },
   studentHeroTitle: {
-    fontSize: 22,
-    lineHeight: 30,
-    fontWeight: "800",
+    fontSize: 20,
+    lineHeight: 28,
+    fontWeight: "700",
     color: Colors.white,
-    letterSpacing: -0.6,
   },
   studentHeroSubtitle: {
+    marginTop: 4,
     fontSize: 14,
     lineHeight: 22,
-    color: "rgba(255,255,255,0.86)",
+    color: "#F0FDF4",
   },
   studentHeroButton: {
-    marginTop: 8,
+    marginTop: 20,
     alignSelf: "flex-start",
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     backgroundColor: "rgba(255,255,255,0.18)",
-    borderRadius: 12,
-    paddingHorizontal: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+    paddingHorizontal: 16,
     paddingVertical: 10,
   },
   studentHeroButtonText: {
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "600",
     color: Colors.white,
+  },
+  studentHeroIconWrap: {
+    width: 74,
+    alignItems: "center",
+    justifyContent: "center",
   },
   studentStatsRow: {
     flexDirection: "row",
-    marginHorizontal: 16,
-    marginTop: 16,
-    gap: 10,
+    justifyContent: "space-between",
   },
   studentStatCard: {
-    flex: 1,
+    width: "31.5%",
     backgroundColor: Colors.white,
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 20,
+    minHeight: 92,
+    borderWidth: 1,
+    borderColor: "rgba(220,229,217,0.3)",
+    paddingHorizontal: 12,
+    paddingVertical: 14,
     alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000000",
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1,
+  },
+  studentStatCardActive: {
+    borderBottomWidth: 4,
+    borderBottomColor: "rgba(0,110,47,0.2)",
   },
   studentStatIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 24,
+    height: 24,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
   },
   studentStatValue: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: Colors.textPrimary,
+    fontSize: 20,
+    lineHeight: 28,
+    fontWeight: "600",
+    color: "#161D16",
   },
   studentStatLabel: {
-    fontSize: 11,
-    fontWeight: "500",
-    color: Colors.textSecondary,
     marginTop: 2,
+    fontSize: 9,
+    lineHeight: 13.5,
+    fontWeight: "600",
+    color: "#3D4A3D",
     textAlign: "center",
+    textTransform: "uppercase",
+    letterSpacing: -0.45,
   },
-  studentSectionCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 14,
-    marginHorizontal: 16,
-    marginTop: 16,
-    padding: 16,
-    gap: 12,
+  studentResultSection: {
+    gap: 16,
   },
-  studentActionCard: {
-    borderRadius: 12,
+  studentSectionTitle: {
+    fontSize: 18,
+    lineHeight: 28,
+    fontWeight: "800",
+    color: "#161D16",
+  },
+  studentResultCard: {
+    backgroundColor: "#FCFDFC",
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: Colors.borderLight,
-    padding: 14,
+    borderColor: "rgba(220,229,217,0.2)",
+    padding: 17,
+    flexDirection: "row",
+    alignItems: "center",
   },
-  studentActionTitle: {
-    fontSize: 15,
+  studentMiniRing: {
+    width: 64,
+    height: 64,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 16,
+  },
+  studentMiniRingBase: {
+    position: "absolute",
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 6,
+    borderColor: "#E5E7EB",
+  },
+  studentMiniRingArc: {
+    position: "absolute",
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 6,
+    borderTopColor: Colors.primary,
+    borderLeftColor: Colors.primary,
+    borderBottomColor: Colors.primary,
+    borderRightColor: "transparent",
+    transform: [{ rotate: "35deg" }],
+  },
+  studentMiniRingInner: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  studentMiniRingValue: {
+    fontSize: 18,
+    lineHeight: 28,
+    fontWeight: "600",
+    color: "#006E2F",
+  },
+  studentResultContent: {
+    flex: 1,
+  },
+  studentResultTitle: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: "600",
+    color: "#161D16",
+  },
+  studentResultSubtitle: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "400",
+    color: "#3D4A3D",
+  },
+  studentProgressTrack: {
+    marginTop: 8,
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: "#F1F5F1",
+    overflow: "hidden",
+  },
+  studentProgressFill: {
+    width: "90%",
+    height: "100%",
+    borderRadius: 999,
+    backgroundColor: "#006E2F",
+  },
+  studentResultChevron: {
+    marginLeft: 10,
+  },
+  studentExamSection: {
+    gap: 16,
+  },
+  studentSectionLink: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "600",
+    color: "#006E2F",
+    letterSpacing: 0.6,
+  },
+  studentExamCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(220,229,217,0.3)",
+    padding: 21,
+    shadowColor: "#000000",
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1,
+  },
+  studentExamTop: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+  },
+  studentSubjectPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  studentSubjectText: {
+    fontSize: 10,
+    lineHeight: 15,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  studentDurationWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  studentDurationText: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "500",
+    color: "#3D4A3D",
+  },
+  studentExamTitle: {
+    marginTop: 14,
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: "600",
+    color: "#161D16",
+  },
+  studentExamFooter: {
+    marginTop: 16,
+    paddingTop: 9,
+    borderTopWidth: 1,
+    borderTopColor: "#F1F5F1",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  studentAvatarStack: {
+    width: 58,
+    height: 24,
+    position: "relative",
+  },
+  studentExamAvatar: {
+    position: "absolute",
+    top: 0,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#F1F5F1",
+    borderWidth: 2,
+    borderColor: Colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  studentExamAvatarText: {
+    fontSize: 9,
     fontWeight: "700",
-    color: Colors.textPrimary,
+    color: "#006E2F",
   },
-  studentActionSubtitle: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    marginTop: 6,
+  studentExamAvatarCount: {
+    position: "absolute",
+    top: 0,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "rgba(33,196,93,0.2)",
+    borderWidth: 2,
+    borderColor: Colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  studentExamAvatarCountText: {
+    fontSize: 8,
+    fontWeight: "600",
+    color: "#006E2F",
+  },
+  studentExamButton: {
+    backgroundColor: "#F8FAF8",
+    borderWidth: 1,
+    borderColor: "#F1F5F1",
+    borderRadius: 999,
+    paddingHorizontal: 17,
+    paddingVertical: 7,
+  },
+  studentExamButtonText: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "600",
+    color: "#006E2F",
+    textAlign: "center",
   },
 
   teacherScroll: {
