@@ -8,43 +8,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useMockSession } from "../../context/MockSessionContext";
+import { getResultForStudentExam } from "../../mocks/appData";
 import { Colors } from "../../theme";
 import type { DashboardStackParamList } from "../../types";
 
-interface Props {
-  navigation: NativeStackNavigationProp<DashboardStackParamList>;
-}
-
-const STATS = [
-  {
-    id: "correct",
-    value: 4,
-    label: "Đúng",
-    tint: "#EEFDF5",
-    valueColor: "#16A34A",
-    labelColor: "rgba(22,163,74,0.7)",
-    icon: "checkmark-circle-outline" as const,
-  },
-  {
-    id: "wrong",
-    value: 1,
-    label: "Sai",
-    tint: "#FFF5F5",
-    valueColor: "#BE123C",
-    labelColor: "rgba(225,29,72,0.7)",
-    icon: "close-circle-outline" as const,
-  },
-  {
-    id: "skipped",
-    value: 0,
-    label: "Bỏ qua",
-    tint: "#F8FAFC",
-    valueColor: "#334155",
-    labelColor: "rgba(100,116,139,0.7)",
-    icon: "help-circle-outline" as const,
-  },
-];
+type Props = NativeStackScreenProps<DashboardStackParamList, "KetQuaBaiThi">;
 
 const BOTTOM_TABS = [
   { id: "home", label: "Trang chủ", icon: "home-outline" as const },
@@ -53,9 +23,42 @@ const BOTTOM_TABS = [
   { id: "profile", label: "Cá nhân", icon: "person-outline" as const },
 ];
 
-export const KetQuaBaiThiScreen: React.FC<Props> = ({ navigation }) => {
-  const score = 8;
-  const total = 10;
+export const KetQuaBaiThiScreen: React.FC<Props> = ({ navigation, route }) => {
+  const { currentUser } = useMockSession();
+  const result =
+    getResultForStudentExam(currentUser.id, route.params.examId) ??
+    getResultForStudentExam(currentUser.id, "exam-1");
+  const score = result?.score ?? 8;
+  const total = result?.total ?? 10;
+  const stats = [
+    {
+      id: "correct",
+      value: result?.correct ?? 4,
+      label: "Đúng",
+      tint: "#EEFDF5",
+      valueColor: "#16A34A",
+      labelColor: "rgba(22,163,74,0.7)",
+      icon: "checkmark-circle-outline" as const,
+    },
+    {
+      id: "wrong",
+      value: result?.wrong ?? 1,
+      label: "Sai",
+      tint: "#FFF5F5",
+      valueColor: "#BE123C",
+      labelColor: "rgba(225,29,72,0.7)",
+      icon: "close-circle-outline" as const,
+    },
+    {
+      id: "skipped",
+      value: result?.skipped ?? 0,
+      label: "Bỏ qua",
+      tint: "#F8FAFC",
+      valueColor: "#334155",
+      labelColor: "rgba(100,116,139,0.7)",
+      icon: "help-circle-outline" as const,
+    },
+  ];
 
   return (
     <View style={styles.wrapper}>
@@ -95,7 +98,7 @@ export const KetQuaBaiThiScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         <View style={styles.statsRow}>
-          {STATS.map((stat) => (
+          {stats.map((stat) => (
             <View
               key={stat.id}
               style={[styles.statCard, { backgroundColor: stat.tint }]}

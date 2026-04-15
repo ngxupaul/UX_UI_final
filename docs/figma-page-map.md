@@ -36,6 +36,7 @@ These pages are primarily for the teacher workflow: creating exams, managing cla
 | `Phát đề & Chia sẻ` | Publish and share exam | 1 |
 | `Lớp học` | Class management | 1 |
 | `Thống kê & Phân tích lớp` | Teacher analytics | 1 |
+| `Cài đặt Tài khoản` | Teacher account/settings page; Figma labels it `Giáo viên` and uses teacher bottom nav | 1 |
 
 ## Student Pages
 
@@ -60,7 +61,6 @@ These pages are shared across both roles or belong to onboarding/authentication.
 | `Đăng ký tài khoản mới` | Register | 2 |
 | `Khôi phục Mật khẩu` | Forgot password | 1 |
 | `yêu cầu mật khẩu` | Password prompt / gated access | 1 |
-| `Cài đặt Tài khoản` | Account settings; likely shared | 1 |
 
 ## Draft / Trash / Exploration Pages
 
@@ -129,5 +129,5 @@ Use this when searching Figma quickly:
   - `Học sinh Làm bài thi`: `15`
   - `Body`: `7`
   - `Kết quả Bài thi Học sinh`: `3`
-- `Cài đặt Tài khoản` is listed as shared because the name does not clearly lock it to only teacher or only student.
+- `Cài đặt Tài khoản` is classified as a teacher page after re-checking the Figma content. The page includes the `Giáo viên` role label and teacher-style bottom navigation.
 - `Page 1` and `Body` appear to be broad working canvases rather than single implementation targets.

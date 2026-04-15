@@ -68,6 +68,8 @@ No backend required — login uses hardcoded dummy accounts.
 
 The login screen now defaults to the **Student** demo account and also provides quick-fill chips for **Học sinh**, **Giáo viên**, and **Admin**.
 
+Inside **Cài đặt**, the app also includes a local role switcher so you can swap between teacher and student dummy datasets without any database or backend.
+
 ---
 
 ## 🗂️ App Structure

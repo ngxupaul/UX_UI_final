@@ -8,77 +8,30 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
+import { useMockSession } from "../../context/MockSessionContext";
+import { getExamById, getQuestionsForExam } from "../../mocks/appData";
 import { Colors } from "../../theme";
 import type { DashboardStackParamList } from "../../types";
 
-interface Props {
-  navigation: NativeStackNavigationProp<DashboardStackParamList>;
-}
+type Props = NativeStackScreenProps<DashboardStackParamList, "HocSinhLamBai">;
 
-type Question = {
-  id: string;
-  subject: string;
-  content: string;
-  options: string[];
-  correct: number;
-  hasArtwork?: boolean;
-};
-
-const QUESTIONS: Question[] = [
-  {
-    id: "1",
-    subject: "Vật lý 12",
-    content:
-      "Một vật dao động điều hòa với tần số góc ω = 10 rad/s. Tại thời điểm t=0, vật đi qua vị trí cân bằng theo chiều dương. Phương trình dao động của vật là gì?",
-    options: [
-      "x = 10cos(10t - π/2) cm",
-      "x = 5cos(10t + π/2) cm",
-      "x = 10cos(10t + π) cm",
-      "x = 5cos(10t) cm",
-    ],
-    correct: 0,
-    hasArtwork: true,
-  },
-  {
-    id: "2",
-    subject: "Địa lý 6",
-    content: "Đảo lớn nhất Việt Nam là đảo nào?",
-    options: ["Cát Bà", "Phú Quốc", "Lý Sơn", "Cồn Cỏ"],
-    correct: 1,
-  },
-  {
-    id: "3",
-    subject: "Hóa học 10",
-    content: "Công thức hóa học của nước là gì?",
-    options: ["CO2", "H2O", "O2", "NaCl"],
-    correct: 1,
-  },
-  {
-    id: "4",
-    subject: "Ngữ văn 11",
-    content: "Tác giả của tác phẩm 'Lão Hạc' là ai?",
-    options: ["Nam Cao", "Tô Hoài", "Nguyễn Du", "Xuân Diệu"],
-    correct: 0,
-  },
-];
-
-const ANSWER_STATUS = [
-  { id: "correct", label: "Đúng", color: "#22C55E", count: 4 },
-  { id: "wrong", label: "Sai", color: "#F43F5E", count: 1 },
-  { id: "skipped", label: "Bỏ qua", color: "#94A3B8", count: 0 },
-];
-
-export const HocSinhLamBaiScreen: React.FC<Props> = ({ navigation }) => {
+export const HocSinhLamBaiScreen: React.FC<Props> = ({ navigation, route }) => {
+  const { currentUser } = useMockSession();
+  const exam = getExamById(route.params.examId) ?? getExamById("exam-1");
+  const questions = getQuestionsForExam(exam?.id ?? "exam-1");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
 
-  const question = QUESTIONS[currentIndex];
+  const question = questions[currentIndex];
   const selectedIndex = answers[question.id];
 
   const progress = useMemo(
-    () => (currentIndex + 1) / QUESTIONS.length,
-    [currentIndex]
+    () => (currentIndex + 1) / questions.length,
+    [currentIndex, questions.length]
   );
 
   const selectAnswer = (index: number) => {
@@ -86,8 +39,8 @@ export const HocSinhLamBaiScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleNext = () => {
-    if (currentIndex === QUESTIONS.length - 1) {
-      navigation.navigate("KetQuaBaiThi", { examId: "1" });
+    if (currentIndex === questions.length - 1) {
+      navigation.navigate("KetQuaBaiThi", { examId: exam?.id ?? "exam-1" });
       return;
     }
 
@@ -114,7 +67,7 @@ export const HocSinhLamBaiScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.headerCenter}>
             <Text style={styles.headerTitle}>Bài thi</Text>
             <Text style={styles.headerSubtitle}>
-              Câu {currentIndex + 1}/{QUESTIONS.length}
+              {currentUser.name} • Câu {currentIndex + 1}/{questions.length}
             </Text>
           </View>
 
@@ -209,7 +162,7 @@ export const HocSinhLamBaiScreen: React.FC<Props> = ({ navigation }) => {
             <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
           </View>
           <Text style={styles.progressText}>
-            {Object.keys(answers).length}/{QUESTIONS.length}
+            {Object.keys(answers).length}/{questions.length}
           </Text>
         </View>
 
@@ -223,9 +176,9 @@ export const HocSinhLamBaiScreen: React.FC<Props> = ({ navigation }) => {
 
           <TouchableOpacity onPress={handleNext} style={styles.footerBtnPrimary}>
             <Text style={styles.footerBtnPrimaryText}>
-              {currentIndex === QUESTIONS.length - 1 ? "Nộp bài" : "Tiếp theo"}
+              {currentIndex === questions.length - 1 ? "Nộp bài" : "Tiếp theo"}
             </Text>
-            {currentIndex !== QUESTIONS.length - 1 && (
+            {currentIndex !== questions.length - 1 && (
               <Ionicons name="chevron-forward" size={18} color={Colors.white} />
             )}
           </TouchableOpacity>

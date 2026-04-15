@@ -6,12 +6,16 @@ import { KhoDeScreen } from '../screens/khoDe/KhoDeScreen';
 import { LopHocScreen } from '../screens/lopHoc/LopHocScreen';
 import { CaiDatScreen } from '../screens/caiDat/CaiDatScreen';
 import { ThongKeScreen } from '../screens/thongKe/ThongKeScreen';
+import { useMockSession } from '../context/MockSessionContext';
 import { Colors } from '../theme';
 import type { MainTabParamList } from '../types';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export const MainTabNavigator: React.FC = () => {
+  const { currentUser } = useMockSession();
+  const isStudent = currentUser.role === 'student';
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -49,27 +53,27 @@ export const MainTabNavigator: React.FC = () => {
       <Tab.Screen
         name="DashboardTab"
         component={DashboardScreen}
-        options={{ tabBarLabel: 'Dashboard' }}
+        options={{ tabBarLabel: isStudent ? 'Trang chủ' : 'Dashboard' }}
       />
       <Tab.Screen
         name="KhoDeTab"
         component={KhoDeScreen}
-        options={{ tabBarLabel: 'Kho đề' }}
+        options={{ tabBarLabel: isStudent ? 'Bài thi' : 'Kho đề' }}
       />
       <Tab.Screen
         name="LopHocTab"
         component={LopHocScreen}
-        options={{ tabBarLabel: 'Lớp học' }}
+        options={{ tabBarLabel: isStudent ? 'Lớp' : 'Lớp học' }}
       />
       <Tab.Screen
         name="ThongKeTab"
         component={ThongKeScreen}
-        options={{ tabBarLabel: 'Báo cáo' }}
+        options={{ tabBarLabel: isStudent ? 'Kết quả' : 'Báo cáo' }}
       />
       <Tab.Screen
         name="CaiDatTab"
         component={CaiDatScreen}
-        options={{ tabBarLabel: 'Hồ sơ' }}
+        options={{ tabBarLabel: isStudent ? 'Cá nhân' : 'Hồ sơ' }}
       />
     </Tab.Navigator>
   );

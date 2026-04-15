@@ -1,158 +1,284 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../theme';
-import { Avatar } from '../../components';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { DashboardStackParamList } from '../../types';
+import React from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Avatar } from "../../components";
+import { useMockSession } from "../../context/MockSessionContext";
+import {
+  MOCK_CLASSES,
+  getResultsForStudent,
+  getResultsForTeacher,
+  getStudentExams,
+  getTeacherExams,
+} from "../../mocks/appData";
+import { Colors } from "../../theme";
+import type { DashboardStackParamList } from "../../types";
 
 interface Props {
   navigation: NativeStackNavigationProp<DashboardStackParamList>;
 }
 
 export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
+  const { currentUser } = useMockSession();
+  const isStudent = currentUser.role === "student";
+  const teacherOwnerId = currentUser.role === "admin" ? "teacher-1" : currentUser.id;
+
+  const teacherExams = getTeacherExams(teacherOwnerId);
+  const teacherExamsForClasses = isStudent ? getTeacherExams("teacher-1") : teacherExams;
+  const teacherResults = getResultsForTeacher(teacherOwnerId);
+  const studentExams = getStudentExams(currentUser.id);
+  const studentResults = getResultsForStudent(currentUser.id);
+  const classes = MOCK_CLASSES.filter(
+    (item) =>
+      item.teacherId === teacherOwnerId || item.studentIds.includes(currentUser.id)
+  );
+
+  const studentAverage = studentResults.length
+    ? (
+        studentResults.reduce((sum, item) => sum + item.score, 0) /
+        studentResults.length
+      ).toFixed(1)
+    : "0.0";
+
+  const teacherStats = [
+    {
+      label: "Tổng đề thi",
+      value: String(teacherExams.length),
+      icon: "document-text-outline" as const,
+      color: Colors.primary,
+    },
+    {
+      label: "Đang mở",
+      value: String(teacherExams.filter((item) => item.status === "open").length),
+      icon: "flash-outline" as const,
+      color: Colors.info,
+    },
+    {
+      label: "Lượt nộp bài",
+      value: String(teacherResults.length),
+      icon: "checkmark-done-outline" as const,
+      color: Colors.warning,
+    },
+  ];
+
+  const studentStats = [
+    {
+      label: "Bài thi được giao",
+      value: String(studentExams.length),
+      icon: "reader-outline" as const,
+      color: Colors.primary,
+    },
+    {
+      label: "Đã hoàn thành",
+      value: String(studentResults.length),
+      icon: "checkmark-circle-outline" as const,
+      color: Colors.success,
+    },
+    {
+      label: "Điểm trung bình",
+      value: studentAverage,
+      icon: "bar-chart-outline" as const,
+      color: Colors.info,
+    },
+  ];
+
+  const upcomingStudentExam = studentExams[0];
+  const latestResult = studentResults[0];
+
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Avatar name="Thầy Nam" size={48} />
-            <View style={styles.headerText}>
+            <Avatar name={currentUser.name} size={48} />
+            <View>
               <Text style={styles.greeting}>Xin chào,</Text>
-              <Text style={styles.userName}>Thầy Nam</Text>
+              <Text style={styles.userName}>{currentUser.name}</Text>
+              <Text style={styles.userRole}>{currentUser.title}</Text>
             </View>
           </View>
+
           <View style={styles.headerRight}>
             <TouchableOpacity style={styles.iconBtn}>
-              <Ionicons name="notifications-outline" size={24} color={Colors.textPrimary} />
+              <Ionicons
+                name="notifications-outline"
+                size={22}
+                color={Colors.textPrimary}
+              />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconBtn}>
-              <Ionicons name="add-circle-outline" size={24} color={Colors.primary} />
-            </TouchableOpacity>
+            {!isStudent && (
+              <TouchableOpacity
+                onPress={() => navigation.navigate("AIGenerator")}
+                style={styles.iconBtn}
+              >
+                <Ionicons name="add-circle-outline" size={22} color={Colors.primary} />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
-        {/* Banner Card */}
-        <View style={styles.bannerCard}>
-          <View style={styles.bannerContent}>
-            <Text style={styles.bannerTitle}>Tạo đề thi mới</Text>
-            <Text style={styles.bannerSub}>Sử dụng AI để tạo đề thi trong 30s</Text>
+        <View style={styles.heroCard}>
+          <View style={styles.heroContent}>
+            <Text style={styles.heroEyebrow}>
+              {isStudent ? "Không gian học tập" : "Bảng điều khiển giáo viên"}
+            </Text>
+            <Text style={styles.heroTitle}>
+              {isStudent ? "Sẵn sàng cho bài thi hôm nay" : "Tạo đề và quản lý lớp học"}
+            </Text>
+            <Text style={styles.heroText}>
+              {isStudent
+                ? "Theo dõi bài thi được giao, tiến độ làm bài và kết quả mới nhất của bạn."
+                : "Mọi lớp học, đề thi và kết quả nộp bài đều đang dùng chung bộ dữ liệu mẫu để dễ kiểm tra luồng."}
+            </Text>
+
             <TouchableOpacity
-              style={styles.bannerBtn}
-              onPress={() => navigation.navigate('AIGenerator')}
+              onPress={() =>
+                isStudent
+                  ? navigation.navigate("HocSinhLamBai", {
+                      examId: upcomingStudentExam?.id ?? "exam-1",
+                    })
+                  : navigation.navigate("AIGenerator")
+              }
+              style={styles.heroBtn}
             >
-              <Ionicons name="bulb-outline" size={20} color={Colors.white} />
-              <Text style={styles.bannerBtnText}>Bắt đầu ngay</Text>
+              <Ionicons
+                name={isStudent ? "play-outline" : "sparkles-outline"}
+                size={18}
+                color={Colors.white}
+              />
+              <Text style={styles.heroBtnText}>
+                {isStudent ? "Vào bài thi" : "Tạo đề bằng AI"}
+              </Text>
             </TouchableOpacity>
-          </View>
-          <View style={styles.bannerIcon}>
-            <Ionicons name="sparkles" size={56} color={Colors.white} />
           </View>
         </View>
 
-        {/* Stats Row */}
         <View style={styles.statsRow}>
-          {[
-            { label: 'Tổng đề thi', value: '24', color: Colors.primary },
-            { label: 'Đang mở', value: '06', color: Colors.info },
-            { label: 'Lượt làm bài', value: '160', color: Colors.warning },
-          ].map((stat, i) => (
-            <View key={i} style={styles.statCard}>
-              <View style={styles.statIconWrap}>
-                <View style={[styles.statCircle, { backgroundColor: stat.color + '20' }]} />
+          {(isStudent ? studentStats : teacherStats).map((item) => (
+            <View key={item.label} style={styles.statCard}>
+              <View style={[styles.statIconWrap, { backgroundColor: `${item.color}20` }]}>
+                <Ionicons name={item.icon} size={18} color={item.color} />
               </View>
-              <Text style={styles.statValue}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
+              <Text style={styles.statValue}>{item.value}</Text>
+              <Text style={styles.statLabel}>{item.label}</Text>
             </View>
           ))}
         </View>
 
-        {/* Class Performance */}
-        <View style={styles.perfCard}>
-          <View style={styles.perfHeader}>
-            <Text style={styles.perfTitle}>Hiệu suất lớp học</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('ThongKe')}>
-              <Text style={styles.perfDetail}>Chi tiết</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.perfBody}>
-            <View style={styles.perfLeft}>
-              <View style={styles.passCircle}>
-                <Text style={styles.passPercent}>80%</Text>
-              </View>
-              <Text style={styles.passLabel}>PASS RATE</Text>
-            </View>
-            <View style={styles.perfRight}>
-              {[
-                { color: Colors.success, label: 'Đạt (Pass)', value: '128' },
-                { color: Colors.gray50, label: 'Chưa đạt', value: '32' },
-              ].map((item, i) => (
-                <View key={i} style={styles.perfRow}>
-                  <View style={[styles.perfDot, { backgroundColor: item.color }]} />
-                  <Text style={styles.perfRowLabel}>{item.label}</Text>
-                  <Text style={styles.perfRowValue}>{item.value}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        </View>
-
-        {/* Recent Activity */}
-        <View style={styles.activitySection}>
-          <View style={styles.activityHeader}>
-            <Text style={styles.activityTitle}>Hoạt động gần đây</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAll}>Xem tất cả</Text>
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>
+              {isStudent ? "Lớp học của bạn" : "Lớp học phụ trách"}
+            </Text>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("LopHocDetail", {
+                  classId: classes[0]?.id ?? "class-10a1",
+                })
+              }
+            >
+              <Text style={styles.sectionLink}>Mở chi tiết</Text>
             </TouchableOpacity>
           </View>
 
-          {[
-            {
-              avatar: 'NV',
-              name: 'Nguyễn Văn A',
-              action: 'vừa nộp bài "Kiểm tra 15 phút"',
-              time: '2 phút trước',
-              icon: 'checkmark-circle',
-              iconColor: Colors.success,
-              bg: Colors.successBg,
-            },
-            {
-              avatar: 'AI',
-              name: 'Đề thi',
-              action: 'Toán Chương 1 đã được tạo thành công',
-              time: '15 phút trước',
-              icon: 'bulb',
-              iconColor: Colors.warning,
-              bg: Colors.warningBg,
-            },
-            {
-              avatar: '+3',
-              name: '3 học sinh mới',
-              action: 'đã tham gia lớp 12A1',
-              time: '15 phút trước',
-              icon: 'people',
-              iconColor: Colors.primary,
-              bg: Colors.primaryBg,
-            },
-          ].map((item, i) => (
-            <View key={i} style={styles.activityCard}>
-              <View style={styles.activityAvatarWrap}>
-                <View style={styles.activityAvatar}>
-                  <Text style={styles.activityAvatarText}>{item.avatar}</Text>
-                </View>
-                <View style={[styles.activityIconBadge, { backgroundColor: item.bg }]}>
-                  <Ionicons name={item.icon as any} size={16} color={item.iconColor} />
-                </View>
+          {classes.map((item) => (
+            <View key={item.id} style={styles.listRow}>
+              <View style={styles.listIcon}>
+                <Ionicons name="school-outline" size={18} color={Colors.primary} />
               </View>
-              <View style={styles.activityText}>
-                <Text style={styles.activityName}>{item.name}</Text>
-                <Text style={styles.activityAction}>{item.action}</Text>
-                <Text style={styles.activityTime}>{item.time}</Text>
+              <View style={styles.listText}>
+                <Text style={styles.listTitle}>{item.name}</Text>
+                <Text style={styles.listSubtitle}>
+                  {item.studentIds.length} học sinh •{" "}
+                  {teacherExamsForClasses.filter((exam) =>
+                    exam.classIds.includes(item.id)
+                  ).length} bài thi
+                </Text>
               </View>
             </View>
           ))}
+        </View>
+
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>
+              {isStudent ? "Bài thi và kết quả" : "Hoạt động gần đây"}
+            </Text>
+            <TouchableOpacity
+              onPress={() =>
+                isStudent
+                  ? navigation.navigate("KetQuaBaiThi", { examId: "exam-1" })
+                  : navigation.navigate("ThongKe")
+              }
+            >
+              <Text style={styles.sectionLink}>
+                {isStudent ? "Xem kết quả" : "Xem báo cáo"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {isStudent ? (
+            <>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("HocSinhLamBai", {
+                    examId: upcomingStudentExam?.id ?? "exam-1",
+                  })
+                }
+                style={styles.actionCard}
+              >
+                <Text style={styles.actionTitle}>
+                  {upcomingStudentExam?.title ?? "Bài thi Vật lý dao động"}
+                </Text>
+                <Text style={styles.actionSubtitle}>
+                  {upcomingStudentExam?.subject ?? "Vật lý 12"} •{" "}
+                  {upcomingStudentExam?.duration ?? 15} phút
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("KetQuaBaiThi", {
+                    examId: latestResult?.examId ?? "exam-1",
+                  })
+                }
+                style={styles.actionCard}
+              >
+                <Text style={styles.actionTitle}>
+                  Kết quả gần nhất: {latestResult?.score ?? 8}/{latestResult?.total ?? 10}
+                </Text>
+                <Text style={styles.actionSubtitle}>
+                  {latestResult?.correct ?? 4} câu đúng •{" "}
+                  {latestResult?.wrong ?? 1} câu sai
+                </Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            teacherResults.slice(0, 3).map((result) => (
+              <View key={result.id} style={styles.listRow}>
+                <View style={styles.listIcon}>
+                  <Ionicons
+                    name="checkmark-circle-outline"
+                    size={18}
+                    color={Colors.success}
+                  />
+                </View>
+                <View style={styles.listText}>
+                  <Text style={styles.listTitle}>Nộp bài thành công</Text>
+                  <Text style={styles.listSubtitle}>
+                    {result.submittedAt} • Điểm {result.score}/{result.total}
+                  </Text>
+                </View>
+              </View>
+            ))
+          )}
         </View>
 
         <View style={{ height: 120 }} />
@@ -164,48 +290,62 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.screenBg },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 16,
     backgroundColor: Colors.white,
   },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  headerText: {},
-  greeting: { fontSize: 13, color: Colors.textSecondary, fontWeight: '500' },
-  userName: { fontSize: 17, fontWeight: '700', color: Colors.textPrimary },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  headerLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
+  greeting: { fontSize: 13, color: Colors.textSecondary, fontWeight: "500" },
+  userName: { fontSize: 17, fontWeight: "700", color: Colors.textPrimary },
+  userRole: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  headerRight: { flexDirection: "row", alignItems: "center", gap: 4 },
   iconBtn: { padding: 8 },
-  bannerCard: {
+  heroCard: {
     marginHorizontal: 16,
     marginTop: 16,
-    backgroundColor: Colors.primary,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 20,
-    flexDirection: 'row',
-    overflow: 'hidden',
+    backgroundColor: "#1F8F4D",
   },
-  bannerContent: { flex: 1 },
-  bannerTitle: { fontSize: 18, fontWeight: '700', color: Colors.white, marginBottom: 4 },
-  bannerSub: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginBottom: 12 },
-  bannerBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+  heroContent: { gap: 8 },
+  heroEyebrow: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "700",
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.75)",
   },
-  bannerBtnText: { fontSize: 13, fontWeight: '600', color: Colors.white },
-  bannerIcon: { alignSelf: 'flex-end', opacity: 0.3 },
+  heroTitle: {
+    fontSize: 22,
+    lineHeight: 30,
+    fontWeight: "800",
+    color: Colors.white,
+    letterSpacing: -0.6,
+  },
+  heroText: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: "rgba(255,255,255,0.86)",
+  },
+  heroBtn: {
+    marginTop: 8,
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  heroBtnText: { fontSize: 14, fontWeight: "700", color: Colors.white },
   statsRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginHorizontal: 16,
     marginTop: 16,
     gap: 10,
@@ -213,92 +353,63 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     backgroundColor: Colors.white,
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 14,
-    alignItems: 'center',
+    alignItems: "center",
   },
-  statIconWrap: { marginBottom: 8 },
-  statCircle: { width: 36, height: 36, borderRadius: 18 },
-  statValue: { fontSize: 22, fontWeight: '700', color: Colors.textPrimary, marginBottom: 2 },
-  statLabel: { fontSize: 11, color: Colors.textSecondary, fontWeight: '500' },
-  perfCard: {
+  statIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  statValue: { fontSize: 22, fontWeight: "700", color: Colors.textPrimary },
+  statLabel: {
+    fontSize: 11,
+    fontWeight: "500",
+    color: Colors.textSecondary,
+    marginTop: 2,
+    textAlign: "center",
+  },
+  sectionCard: {
     backgroundColor: Colors.white,
-    borderRadius: 12,
+    borderRadius: 14,
     marginHorizontal: 16,
     marginTop: 16,
     padding: 16,
+    gap: 12,
   },
-  perfHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
-  perfTitle: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
-  perfDetail: { fontSize: 12, color: Colors.primary, fontWeight: '600' },
-  perfBody: { flexDirection: 'row', alignItems: 'center' },
-  perfLeft: { alignItems: 'center', marginRight: 24 },
-  passCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 8,
-    borderColor: Colors.success,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
+  sectionTitle: { fontSize: 16, fontWeight: "700", color: Colors.textPrimary },
+  sectionLink: { fontSize: 13, fontWeight: "600", color: Colors.primary },
+  listRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
   },
-  passPercent: { fontSize: 22, fontWeight: '700', color: Colors.textPrimary },
-  passLabel: { fontSize: 10, color: Colors.textSecondary, fontWeight: '600', letterSpacing: 1 },
-  perfRight: { flex: 1 },
-  perfRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  perfDot: { width: 10, height: 10, borderRadius: 5, marginRight: 8 },
-  perfRowLabel: { flex: 1, fontSize: 13, color: Colors.textSecondary },
-  perfRowValue: { fontSize: 13, fontWeight: '700', color: Colors.textPrimary },
-  activitySection: { marginTop: 20, paddingHorizontal: 16 },
-  activityHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  activityTitle: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
-  seeAll: { fontSize: 12, color: Colors.primary, fontWeight: '600' },
-  activityCard: {
-    flexDirection: 'row',
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-  },
-  activityAvatarWrap: { marginRight: 12, position: 'relative' },
-  activityAvatar: {
+  listIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.gray20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 12,
+    backgroundColor: Colors.primaryBg,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  activityAvatarText: { fontSize: 13, fontWeight: '700', color: Colors.textSecondary },
-  activityIconBadge: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: Colors.white,
+  listText: { flex: 1 },
+  listTitle: { fontSize: 14, fontWeight: "700", color: Colors.textPrimary },
+  listSubtitle: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
+  actionCard: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    padding: 14,
   },
-  activityText: { flex: 1 },
-  activityName: { fontSize: 13, fontWeight: '600', color: Colors.textPrimary, marginBottom: 2 },
-  activityAction: { fontSize: 13, color: Colors.textPrimary, marginBottom: 2 },
-  activityTime: { fontSize: 11, color: Colors.textMuted },
+  actionTitle: { fontSize: 15, fontWeight: "700", color: Colors.textPrimary },
+  actionSubtitle: { fontSize: 13, color: Colors.textSecondary, marginTop: 6 },
 });

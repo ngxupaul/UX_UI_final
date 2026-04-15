@@ -14,29 +14,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useMockSession } from "../../context/MockSessionContext";
+import { MOCK_USERS } from "../../mocks/appData";
+import type { AppRole } from "../../mocks/appData";
 import { Colors } from "../../theme";
 import type { AuthStackParamList } from "../../types";
-
-const DUMMY_USERS = [
-  {
-    email: "admin@flazers.vn",
-    password: "admin123",
-    name: "Nguyễn Văn Admin",
-    role: "admin",
-  },
-  {
-    email: "giaovien@flazers.vn",
-    password: "teacher123",
-    name: "Trần Thị Giáo Viên",
-    role: "teacher",
-  },
-  {
-    email: "hocsinh@flazers.vn",
-    password: "student123",
-    name: "Lê Minh Học Sinh",
-    role: "student",
-  },
-];
 
 interface Props {
   navigation: NativeStackNavigationProp<AuthStackParamList, "Login">;
@@ -53,13 +35,14 @@ const BrandMark = () => (
 );
 
 export const LoginScreen: React.FC<Props> = ({ navigation, onAuthSuccess }) => {
+  const { setCurrentUserByEmail } = useMockSession();
   const [email, setEmail] = useState("hocsinh@flazers.vn");
   const [password, setPassword] = useState("student123");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const fillDemo = (role: "admin" | "teacher" | "student") => {
-    const user = DUMMY_USERS.find((item) => item.role === role);
+  const fillDemo = (role: AppRole) => {
+    const user = MOCK_USERS.find((item) => item.role === role);
     if (!user) return;
     setEmail(user.email);
     setPassword(user.password);
@@ -74,7 +57,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation, onAuthSuccess }) => {
     setLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    const user = DUMMY_USERS.find(
+    const user = MOCK_USERS.find(
       (item) =>
         item.email.toLowerCase() === email.trim().toLowerCase() &&
         item.password === password
@@ -90,6 +73,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation, onAuthSuccess }) => {
     }
 
     setLoading(false);
+    setCurrentUserByEmail(user.email);
     onAuthSuccess?.();
   };
 
