@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
 import { DeleteConfirmDialog } from '../../components';
+import { useDraftExam } from '../../context/DraftExamContext';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { DashboardStackParamList } from '../../types';
 
@@ -42,55 +43,16 @@ const WizardStep = () => (
   </View>
 );
 
-const MOCK_QUESTIONS = [
-  {
-    num: '01',
-    type: 'Trắc nghiệm',
-    difficulty: 'Dễ',
-    points: '2.0 điểm',
-    content: 'Việt Nam nằm ở phía nào của bán đảo Đông Dương?',
-    answer: 'Phía Đông',
-  },
-  {
-    num: '02',
-    type: 'Trắc nghiệm',
-    difficulty: 'Dễ',
-    points: '2.0 điểm',
-    content: 'Đảo lớn nhất Việt Nam là đảo nào?',
-    answer: 'Phú Quốc',
-  },
-  {
-    num: '03',
-    type: 'Trắc nghiệm',
-    difficulty: 'Dễ',
-    points: '2.0 điểm',
-    content: 'Loại đá nào được hình thành từ xác động vật?',
-    answer: 'Đá vôi',
-  },
-  {
-    num: '04',
-    type: 'Trắc nghiệm',
-    difficulty: 'Dễ',
-    points: '2.0 điểm',
-    content: 'So với các vùng khác về sản xuất nông nghiệp, Đồng bằng Sông Hồng là vùng có',
-    answer: 'Năng suất lúa cao nhất',
-  },
-  {
-    num: '05',
-    type: 'Trắc nghiệm',
-    difficulty: 'Dễ',
-    points: '2.0 điểm',
-    content: 'Loại đất nào có diện tích lớn nhất Đồng bằng Sông Cửu Long?',
-    answer: 'Đất phèn',
-  },
-];
-
 export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
+  const { draftExam, deleteQuestion } = useDraftExam();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const handleDeletePress = (num: string) => setDeleteTarget(num);
+  const handleDeletePress = (questionId: string) => setDeleteTarget(questionId);
   const handleDeleteConfirm = () => {
-    // TODO: remove question from state
+    if (deleteTarget) {
+      deleteQuestion(deleteTarget);
+    }
     setDeleteTarget(null);
   };
 
@@ -107,7 +69,7 @@ export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
           <Ionicons name="chevron-back" size={18} color={Colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Tạo đề thi mới</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.saveDraft}>Lưu nháp</Text>
         </TouchableOpacity>
       </View>
@@ -118,12 +80,18 @@ export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* List header */}
         <View style={styles.listHeader}>
-          <Text style={styles.listTitle}>Danh sách câu hỏi (5)</Text>
+          <Text style={styles.listTitle}>Danh sách câu hỏi ({draftExam.questions.length})</Text>
           <View style={styles.headerActions}>
-            <TouchableOpacity style={styles.iconActionBtn}>
+            <TouchableOpacity
+              style={[styles.iconActionBtn, viewMode === 'grid' && styles.iconActionBtnActive]}
+              onPress={() => setViewMode('grid')}
+            >
               <Ionicons name="grid-outline" size={16} color="#64748B" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconActionBtn}>
+            <TouchableOpacity
+              style={[styles.iconActionBtn, viewMode === 'list' && styles.iconActionBtnActive]}
+              onPress={() => setViewMode('list')}
+            >
               <Ionicons name="list-outline" size={16} color="#64748B" />
             </TouchableOpacity>
           </View>
@@ -131,16 +99,22 @@ export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* Exam info banner */}
         <View style={styles.examBanner}>
-          <Text style={styles.examBannerTitle}>Kiểm tra 15 phút - Chương 1</Text>
-          <TouchableOpacity style={styles.editLink}>
+          <Text style={styles.examBannerTitle}>{draftExam.title}</Text>
+          <TouchableOpacity
+            style={styles.editLink}
+            onPress={() => navigation.navigate('TaoDeThi')}
+          >
             <Ionicons name="pencil" size={12} color="#64748B" />
             <Text style={styles.editLinkText}>Sửa</Text>
           </TouchableOpacity>
         </View>
 
         {/* Question cards */}
-        {MOCK_QUESTIONS.map((q) => (
-          <View key={q.num} style={styles.questionCard}>
+        {draftExam.questions.map((q) => (
+          <View
+            key={q.id}
+            style={[styles.questionCard, viewMode === 'list' && styles.questionCardCompact]}
+          >
             {/* Question number */}
             <View style={styles.qNumBadge}>
               <Text style={styles.qNumText}>{q.num}</Text>
@@ -170,12 +144,17 @@ export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.qActions}>
               <TouchableOpacity
                 style={styles.actionBtn}
-                onPress={() => navigation.navigate('ChinhSuaCauHoi', { examId: '1', questionId: q.num })}
+                onPress={() =>
+                  navigation.navigate('ChinhSuaCauHoi', {
+                    examId: draftExam.examId,
+                    questionId: q.id,
+                  })
+                }
               >
                 <Ionicons name="pencil" size={12} color="#64748B" />
                 <Text style={styles.actionBtnText}>Sửa</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn} onPress={() => handleDeletePress(q.num)}>
+              <TouchableOpacity style={styles.actionBtn} onPress={() => handleDeletePress(q.id)}>
                 <Ionicons name="trash-outline" size={12} color="#94A3B8" />
                 <Text style={styles.actionBtnTextMuted}>Xóa</Text>
               </TouchableOpacity>
@@ -187,7 +166,7 @@ export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.addRow}>
           <TouchableOpacity
             style={styles.addBtnGreen}
-            onPress={() => navigation.navigate('ThemCauHoi', { examId: '1' })}
+            onPress={() => navigation.navigate('ThemCauHoi', { examId: draftExam.examId })}
           >
             <Ionicons name="add" size={20} color={Colors.white} />
             <Text style={styles.addBtnGreenText}>Thêm câu hỏi mới</Text>
@@ -204,7 +183,7 @@ export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
         {/* Publish button */}
         <TouchableOpacity
           style={styles.publishBtn}
-          onPress={() => navigation.navigate('PhatDe', { examId: '1' })}
+          onPress={() => navigation.navigate('PhatDe', { examId: draftExam.examId })}
         >
           <Ionicons name="paper-plane-outline" size={18} color={Colors.white} />
           <Text style={styles.publishBtnText}>Phát hành đề thi</Text>
@@ -304,6 +283,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.gray20,
   },
+  iconActionBtnActive: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryBg,
+  },
   examBanner: {
     backgroundColor: Colors.white,
     borderRadius: 12,
@@ -326,6 +309,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.borderLight,
     position: 'relative',
+  },
+  questionCardCompact: {
+    paddingVertical: 14,
   },
   qNumBadge: {
     width: 32,

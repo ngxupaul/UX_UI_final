@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useDraftExam } from '../../context/DraftExamContext';
 import { Colors } from '../../theme';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { DashboardStackParamList } from '../../types';
@@ -18,14 +19,54 @@ const OPTIONS_DATA = [
 ];
 
 export const ThemCauHoiScreen: React.FC<Props> = ({ navigation }) => {
+  const { addQuestion } = useDraftExam();
   const [question, setQuestion] = useState('Việt Nam nằm ở phía nào của bán đảo Đông Dương?');
   const [explanation, setExplanation] = useState(
     'Số 17 chỉ có hai ước số là 1 và chính nó (17), do đó 17 là số nguyên tố. Các số còn lại: 25 chia hết cho 5; 49 chia hết cho 7; 9 chia hết cho 3.'
   );
   const [options, setOptions] = useState(OPTIONS_DATA);
 
+  const canDeleteOption = options.length > 2;
   const toggleCorrect = (idx: number) => {
     setOptions(options.map((o, i) => ({ ...o, isCorrect: i === idx })));
+  };
+
+  const handleDeleteOption = (idx: number) => {
+    if (!canDeleteOption) return;
+    const nextOptions = options.filter((_, optionIndex) => optionIndex !== idx);
+    const normalized = nextOptions.map((option, optionIndex) => ({
+      ...option,
+      letter: String.fromCharCode(65 + optionIndex),
+    }));
+
+    if (!normalized.some((option) => option.isCorrect) && normalized[0]) {
+      normalized[0].isCorrect = true;
+    }
+
+    setOptions(normalized);
+  };
+
+  const handleAddOption = () => {
+    setOptions((current) => [
+      ...current,
+      {
+        letter: String.fromCharCode(65 + current.length),
+        text: '',
+        isCorrect: false,
+      },
+    ]);
+  };
+
+  const handleSave = () => {
+    addQuestion({
+      type: 'Trắc nghiệm',
+      difficulty: 'Dễ',
+      points: '2.0 điểm',
+      content: question,
+      explanation,
+      options,
+    });
+    navigation.goBack();
   };
 
   return (
@@ -36,7 +77,7 @@ export const ThemCauHoiScreen: React.FC<Props> = ({ navigation }) => {
           <Ionicons name="chevron-back" size={16} color={Colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Biên soạn Câu hỏi</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleSave}>
           <Text style={styles.saveBtn}>Lưu</Text>
         </TouchableOpacity>
       </View>
@@ -94,7 +135,11 @@ export const ThemCauHoiScreen: React.FC<Props> = ({ navigation }) => {
                       {opt.isCorrect ? ' (Đúng)' : ''}
                     </Text>
                   </View>
-                  <TouchableOpacity style={styles.optionDelete}>
+                  <TouchableOpacity
+                    style={styles.optionDelete}
+                    onPress={() => handleDeleteOption(i)}
+                    disabled={!canDeleteOption}
+                  >
                     <Ionicons name="close-outline" size={14} color="#94A3B8" />
                   </TouchableOpacity>
                 </View>
@@ -116,7 +161,7 @@ export const ThemCauHoiScreen: React.FC<Props> = ({ navigation }) => {
           ))}
 
           {/* Add option button */}
-          <TouchableOpacity style={styles.addOptionBtn}>
+          <TouchableOpacity style={styles.addOptionBtn} onPress={handleAddOption}>
             <Ionicons name="add-circle-outline" size={18} color={Colors.primary} />
             <Text style={styles.addOptionText}>Thêm phương án</Text>
           </TouchableOpacity>
@@ -144,14 +189,14 @@ export const ThemCauHoiScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.bottomBar}>
         <TouchableOpacity
           style={styles.deleteBtn}
-          onPress={() => {}}
+          onPress={() => navigation.goBack()}
         >
           <Ionicons name="trash-outline" size={16} color="#475569" />
-          <Text style={styles.deleteBtnText}>Xóa</Text>
+          <Text style={styles.deleteBtnText}>Hủy</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.saveChangesBtn}
-          onPress={() => navigation.goBack()}
+          onPress={handleSave}
         >
           <Ionicons name="checkmark-outline" size={16} color={Colors.white} />
           <Text style={styles.saveChangesText}>Lưu thay đổi</Text>

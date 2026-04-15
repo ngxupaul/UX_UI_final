@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useDraftExam } from '../../context/DraftExamContext';
 import { Colors } from '../../theme';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { DashboardStackParamList } from '../../types';
@@ -21,9 +22,10 @@ const SUBJECTS = [
 ];
 
 export const TaoDeThiScreen: React.FC<Props> = ({ navigation }) => {
-  const [title, setTitle] = useState('');
+  const { draftExam, updateExamInfo } = useDraftExam();
+  const [title, setTitle] = useState(draftExam.title);
   const [subjects, setSubjects] = useState(SUBJECTS);
-  const [duration, setDuration] = useState('45');
+  const [duration, setDuration] = useState(draftExam.duration);
 
   const toggleSubject = (idx: number) => {
     setSubjects(subjects.map((s, i) => ({ ...s, selected: i === idx })));
@@ -40,7 +42,16 @@ export const TaoDeThiScreen: React.FC<Props> = ({ navigation }) => {
           <Ionicons name="chevron-back" size={18} color={Colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Tạo đề thi mới</Text>
-        <TouchableOpacity><Text style={styles.saveDraft}>Lưu nháp</Text></TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            const selectedSubject =
+              subjects.find((subject) => subject.selected)?.label ?? draftExam.subject;
+            updateExamInfo({ title, duration, subject: selectedSubject });
+            navigation.goBack();
+          }}
+        >
+          <Text style={styles.saveDraft}>Lưu nháp</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Wizard step 1 */}
@@ -123,7 +134,12 @@ export const TaoDeThiScreen: React.FC<Props> = ({ navigation }) => {
         {/* Continue button */}
         <TouchableOpacity
           style={styles.continueBtn}
-          onPress={() => navigation.navigate('SoanThaoCauHoi', { examId: 'new' })}
+          onPress={() => {
+            const selectedSubject =
+              subjects.find((subject) => subject.selected)?.label ?? draftExam.subject;
+            updateExamInfo({ title, duration, subject: selectedSubject });
+            navigation.navigate('SoanThaoCauHoi', { examId: draftExam.examId });
+          }}
         >
           <Text style={styles.continueBtnText}>Tiếp tục tạo câu hỏi</Text>
           <Ionicons name="arrow-forward" size={18} color={Colors.white} />

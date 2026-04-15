@@ -4,6 +4,7 @@ import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { RootNavigator } from './src/navigation';
+import { DraftExamProvider } from './src/context/DraftExamContext';
 import { MockSessionProvider } from './src/context/MockSessionContext';
 import { PaperTheme } from './src/theme';
 
@@ -12,10 +13,12 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <MockSessionProvider>
-          <PaperProvider theme={PaperTheme}>
-            <StatusBar style="dark" />
-            <RootNavigator />
-          </PaperProvider>
+          <DraftExamProvider>
+            <PaperProvider theme={PaperTheme}>
+              <StatusBar style="dark" />
+              <RootNavigator />
+            </PaperProvider>
+          </DraftExamProvider>
         </MockSessionProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

@@ -39,6 +39,7 @@ export const AILoadingScreen: React.FC<Props> = ({ navigation }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const fadeAnim = useRef(new Animated.Value(0.85)).current;
   const progressAnim = useRef(new Animated.Value(20)).current;
+  const hasNavigatedRef = useRef(false);
 
   useEffect(() => {
     const pulse = Animated.loop(
@@ -98,10 +99,18 @@ export const AILoadingScreen: React.FC<Props> = ({ navigation }) => {
         easing: Easing.out(Easing.ease),
         useNativeDriver: false,
       }).start();
+
+      if (current === 100 && !hasNavigatedRef.current) {
+        hasNavigatedRef.current = true;
+        clearInterval(interval);
+        setTimeout(() => {
+          navigation.replace('SoanThaoCauHoi', { examId: 'new' });
+        }, 350);
+      }
     }, 110);
 
     return () => clearInterval(interval);
-  }, [progressAnim]);
+  }, [navigation, progressAnim]);
 
   const progressWidth = progressAnim.interpolate({
     inputRange: [0, 100],
