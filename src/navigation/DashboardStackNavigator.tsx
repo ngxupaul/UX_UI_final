@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MainTabNavigator } from './MainTabNavigator';
 import { KhoDeDetailScreen } from '../screens/khoDe/KhoDeDetailScreen';
 import { KhoDeExamDetailScreen } from '../screens/khoDe/KhoDeExamDetailScreen';
+import { KhoDeClassAnalyticsScreen } from '../screens/khoDe/KhoDeClassAnalyticsScreen';
 import { TaoDeThiScreen } from '../screens/thi/TaoDeThiScreen';
 import { SoanThaoCauHoiScreen } from '../screens/thi/SoanThaoCauHoiScreen';
 import { LamThuDeThiScreen } from '../screens/thi/LamThuDeThiScreen';
@@ -27,6 +28,7 @@ export const DashboardStackNavigator: React.FC = () => {
       <Stack.Screen name="MainTabs" component={MainTabNavigator} />
       <Stack.Screen name="KhoDeDetail" component={KhoDeDetailScreen} />
       <Stack.Screen name="KhoDeExamDetail" component={KhoDeExamDetailScreen} />
+      <Stack.Screen name="KhoDeClassAnalytics" component={KhoDeClassAnalyticsScreen} />
       <Stack.Screen name="TaoDeThi" component={TaoDeThiScreen} />
       <Stack.Screen name="SoanThaoCauHoi" component={SoanThaoCauHoiScreen} />
       <Stack.Screen name="LamThuDeThi" component={LamThuDeThiScreen} />

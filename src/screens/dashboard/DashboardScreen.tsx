@@ -342,7 +342,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             <TouchableOpacity
               style={[styles.iconButton, styles.plusButton]}
               activeOpacity={0.9}
-              onPress={() => navigation.navigate("AIGenerator")}
+              onPress={() => navigation.navigate("TaoDeThi")}
             >
               <Ionicons name="add" size={24} color={Colors.white} />
             </TouchableOpacity>

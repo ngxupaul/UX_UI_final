@@ -6,7 +6,6 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useMockSession } from '../../context/MockSessionContext';
 import {
   getExamById,
-  getQuestionsForExam,
   getResultsForTeacher,
   MOCK_CLASSES,
 } from '../../mocks/appData';
@@ -25,7 +24,6 @@ export const KhoDeExamDetailScreen: React.FC<Props> = ({ navigation, route }) =>
   const { currentUser } = useMockSession();
   const exam = getExamById(route.params.examId) ?? getExamById('exam-2') ?? getExamById('exam-1');
   const examId = exam?.id ?? 'exam-1';
-  const questions = getQuestionsForExam(examId);
   const teacherId = currentUser.role === 'admin' ? 'teacher-1' : currentUser.id;
   const teacherResults = getResultsForTeacher(teacherId).filter((item) => item.examId === examId);
 
@@ -210,7 +208,17 @@ export const KhoDeExamDetailScreen: React.FC<Props> = ({ navigation, route }) =>
           const status = isOpen ? statusMeta : STATUS_META.closed;
 
           return (
-            <View key={item.id} style={[styles.classCard, !isOpen && styles.classCardMuted]}>
+            <TouchableOpacity
+              key={item.id}
+              activeOpacity={0.88}
+              onPress={() =>
+                navigation.navigate('KhoDeClassAnalytics', {
+                  examId,
+                  classId: item.id,
+                })
+              }
+              style={[styles.classCard, !isOpen && styles.classCardMuted]}
+            >
               <View style={styles.classLeft}>
                 <View style={styles.classIconWrap}>
                   <Ionicons name="people-outline" size={18} color="#2B7A38" />
@@ -229,7 +237,7 @@ export const KhoDeExamDetailScreen: React.FC<Props> = ({ navigation, route }) =>
                 </View>
                 <Ionicons name="ellipsis-vertical" size={16} color="#64748B" />
               </View>
-            </View>
+            </TouchableOpacity>
           );
         })}
       </ScrollView>

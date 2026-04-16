@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ExamFlowHeader } from '../../components';
@@ -11,6 +11,9 @@ import type { DashboardStackParamList } from '../../types';
 interface Props {
   navigation: NativeStackNavigationProp<DashboardStackParamList>;
 }
+
+const FIGMA_FAKE_QR_URI =
+  'https://www.figma.com/api/mcp/asset/5b3aeb62-925b-41b0-8081-a4968aea9163';
 
 export const ThietLapDeThiScreen: React.FC<Props> = ({ navigation }) => {
   const { draftExam } = useDraftExam();
@@ -51,7 +54,9 @@ export const ThietLapDeThiScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.qrTitle}>Quét mã để làm bài</Text>
           <Text style={styles.qrExamName}>{draftExam.title}</Text>
           <View style={styles.qrBox}>
-            <View style={styles.qrBg} />
+            <View style={styles.qrCanvas}>
+              <Image source={{ uri: FIGMA_FAKE_QR_URI }} style={styles.qrImage} resizeMode="cover" />
+            </View>
           </View>
           <View style={styles.linkRow}>
             <Ionicons name="link" size={16} color={Colors.textSecondary} />
@@ -175,8 +180,25 @@ const styles = StyleSheet.create({
   },
   qrTitle: { fontSize: 20, fontWeight: '700', color: '#1E293B', marginBottom: 4 },
   qrExamName: { fontSize: 16, fontWeight: '600', color: Colors.textPrimary, marginBottom: 16 },
-  qrBox: { width: 192, height: 192, backgroundColor: Colors.gray10, borderRadius: 16, marginBottom: 16, borderWidth: 1, borderColor: Colors.gray20, overflow: 'hidden' },
-  qrBg: { width: '100%', height: '100%' },
+  qrBox: {
+    width: 220,
+    height: 220,
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  qrCanvas: {
+    width: 162,
+    height: 162,
+    borderRadius: 12,
+    backgroundColor: Colors.white,
+    overflow: 'hidden',
+  },
+  qrImage: { width: '100%', height: '100%' },
   linkRow: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: Colors.gray10, paddingHorizontal: 17, paddingVertical: 5, borderRadius: 16,

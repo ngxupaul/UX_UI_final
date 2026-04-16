@@ -25,6 +25,7 @@ export type DashboardStackParamList = {
   Dashboard: undefined;
   KhoDeDetail: { tab?: 'open' | 'draft' | 'closed' };
   KhoDeExamDetail: { examId: string };
+  KhoDeClassAnalytics: { examId: string; classId: string };
   TaoDeThi: undefined;
   TaoDeThiChiTiet: undefined;
   PhatDe: { examId: string };

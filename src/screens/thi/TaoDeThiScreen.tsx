@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useDraftExam } from '../../context/DraftExamContext';
 import { Colors } from '../../theme';
-import { ExamFlowHeader } from '../../components';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { DashboardStackParamList } from '../../types';
 
@@ -12,208 +11,374 @@ interface Props {
   navigation: NativeStackNavigationProp<DashboardStackParamList>;
 }
 
-const SUBJECTS = [
-  { label: 'Toán', selected: true },
-  { label: 'Tiếng Anh', selected: false },
-  { label: 'Lịch sử', selected: false },
-  { label: 'Địa lý', selected: false },
-  { label: 'Ngữ văn', selected: false },
-  { label: 'Hóa học', selected: false },
-  { label: 'Vật lý', selected: false },
-];
+const SUBJECT_OPTIONS = ['Toán', 'Địa lý 6', 'Tiếng Anh', 'Lịch sử', 'Ngữ văn', 'Hóa học'];
+const CLASS_OPTIONS = ['Lớp 6A1', 'Lớp 6A2', 'Lớp 10A1', 'Lớp 10A2', 'Lớp 11A1'];
+
+const getNextOption = (options: string[], value: string) => {
+  const currentIndex = Math.max(0, options.indexOf(value));
+  return options[(currentIndex + 1) % options.length];
+};
 
 export const TaoDeThiScreen: React.FC<Props> = ({ navigation }) => {
   const { draftExam, updateExamInfo } = useDraftExam();
-  const [title, setTitle] = useState(draftExam.title);
-  const [subjects, setSubjects] = useState(SUBJECTS);
-  const [duration, setDuration] = useState(draftExam.duration);
+  const initialSubject = useMemo(
+    () => (SUBJECT_OPTIONS.includes(draftExam.subject) ? draftExam.subject : SUBJECT_OPTIONS[0]),
+    [draftExam.subject]
+  );
 
-  const toggleSubject = (idx: number) => {
-    setSubjects(subjects.map((s, i) => ({ ...s, selected: i === idx })));
+  const [subject, setSubject] = useState(initialSubject);
+  const [classLabel, setClassLabel] = useState(CLASS_OPTIONS[0]);
+  const [title, setTitle] = useState(draftExam.title || '');
+
+  const handleSaveDraft = () => {
+    updateExamInfo({ title, subject });
+    navigation.goBack();
   };
 
-  const incDuration = () => setDuration(String(parseInt(duration || '0') + 15));
-  const decDuration = () => setDuration(String(Math.max(15, parseInt(duration || '0') - 15)));
+  const handleContinue = () => {
+    updateExamInfo({ title, subject });
+    navigation.navigate('SoanThaoCauHoi', { examId: draftExam.examId });
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ExamFlowHeader
-        title="Tạo đề thi mới"
-        currentStep={1}
-        onBack={() => navigation.goBack()}
-        onSaveDraft={() => {
-          const selectedSubject =
-            subjects.find((subject) => subject.selected)?.label ?? draftExam.subject;
-          updateExamInfo({ title, duration, subject: selectedSubject });
-          navigation.goBack();
-        }}
-      />
+      <View style={styles.header}>
+        <View style={styles.headerRow}>
+          <TouchableOpacity style={styles.headerSide} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={18} color={Colors.textPrimary} />
+          </TouchableOpacity>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        {/* Exam name card */}
-        <View style={styles.examNameCard}>
-          <View style={styles.examNameHeader}>
-            <Text style={styles.examNameLabel}>TÊN ĐỀ THI</Text>
-            <TouchableOpacity>
-              <Ionicons name="pencil-outline" size={16} color="#64748B" />
-            </TouchableOpacity>
-          </View>
-          <TextInput
-            style={styles.examNameInput}
-            placeholder="Nhập tên đề thi..."
-            placeholderTextColor="#B7B7B7"
-            value={title}
-            onChangeText={setTitle}
-          />
+          <Text style={styles.headerTitle}>Tạo đề thi mới</Text>
+
+          <TouchableOpacity style={styles.headerSide} onPress={handleSaveDraft}>
+            <Text style={styles.saveText}>Lưu nháp</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Subject pills */}
-        <View style={styles.section}>
-          <Text style={styles.fieldLabel}>MÔN HỌC</Text>
-          <View style={styles.pillRow}>
-            {subjects.map((s, i) => (
-              <TouchableOpacity
-                key={s.label}
-                style={[styles.pill, s.selected ? styles.pillActive : styles.pillInactive]}
-                onPress={() => toggleSubject(i)}
-              >
-                <Text style={[styles.pillText, s.selected ? styles.pillTextActive : styles.pillTextInactive]}>
-                  {s.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+        <View style={styles.progressWrap}>
+          <View style={styles.progressLineActive} />
+          <View style={styles.progressLineInactive} />
 
-        {/* Duration */}
-        <View style={styles.section}>
-          <Text style={styles.fieldLabel}>THỜI GIAN LÀM BÀI</Text>
-          <View style={styles.durationRow}>
-            <TouchableOpacity style={styles.durationBtn} onPress={decDuration}>
-              <Ionicons name="remove" size={16} color={Colors.textPrimary} />
-            </TouchableOpacity>
-            <View style={styles.durationValue}>
-              <Text style={styles.durationNum}>{duration}</Text>
-              <Text style={styles.durationUnit}> phút</Text>
+          <View style={styles.progressStepActive}>
+            <View style={styles.progressCircleActive}>
+              <Text style={styles.progressCircleActiveText}>1</Text>
             </View>
-            <TouchableOpacity style={styles.durationBtn} onPress={incDuration}>
-              <Ionicons name="add" size={16} color={Colors.textPrimary} />
+            <Text style={styles.progressLabelActive}>Thông tin</Text>
+          </View>
+
+          <View style={styles.progressStepMiddle}>
+            <View style={styles.progressCircleInactive}>
+              <Text style={styles.progressCircleInactiveText}>2</Text>
+            </View>
+            <Text style={styles.progressLabelInactive}>Câu hỏi</Text>
+          </View>
+
+          <View style={styles.progressStepRight}>
+            <View style={styles.progressCircleInactive}>
+              <Text style={styles.progressCircleInactiveText}>3</Text>
+            </View>
+            <Text style={styles.progressLabelInactive}>Cài đặt</Text>
+          </View>
+        </View>
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.contentCard}>
+          <View style={styles.copyBlock}>
+            <Text style={styles.copyTitle}>Cài đặt đề thi</Text>
+            <Text style={styles.copyBody}>
+              Hãy cùng thiết lập các chi tiết cốt lõi cho bài kiểm tra mới của bạn. Thông tin này
+              giúp phân loại và sắp xếp thư viện của bạn.
+            </Text>
+          </View>
+
+          <View style={styles.form}>
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>CHỌN MÔN</Text>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={styles.selector}
+                onPress={() => setSubject((current) => getNextOption(SUBJECT_OPTIONS, current))}
+              >
+                <Text style={styles.selectorText}>{subject}</Text>
+                <Ionicons name="chevron-down" size={18} color="#6B7A65" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>LỚP</Text>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={styles.selector}
+                onPress={() => setClassLabel((current) => getNextOption(CLASS_OPTIONS, current))}
+              >
+                <Text style={styles.selectorText}>{classLabel}</Text>
+                <Ionicons name="chevron-down" size={18} color="#6B7A65" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>TIÊU ĐỀ BÀI KIỂM TRA</Text>
+              <View style={styles.inputWrap}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Vd: Thi giữa kì"
+                  placeholderTextColor="#6B7280"
+                  value={title}
+                  onChangeText={setTitle}
+                />
+                <Ionicons name="pencil" size={18} color="#6B7A65" />
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.actionRow}>
+            <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+              <Text style={styles.continueText}>Tiếp tục</Text>
+              <Ionicons name="arrow-forward" size={20} color={Colors.white} />
             </TouchableOpacity>
           </View>
         </View>
-
-        {/* Continue button */}
-        <TouchableOpacity
-          style={styles.continueBtn}
-          onPress={() => {
-            const selectedSubject =
-              subjects.find((subject) => subject.selected)?.label ?? draftExam.subject;
-            updateExamInfo({ title, duration, subject: selectedSubject });
-            navigation.navigate('SoanThaoCauHoi', { examId: draftExam.examId });
-          }}
-        >
-          <Text style={styles.continueBtnText}>Tiếp tục tạo câu hỏi</Text>
-          <Ionicons name="arrow-forward" size={18} color={Colors.white} />
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.screenBg },
-  scroll: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 120 },
-  examNameCard: {
+  container: {
+    flex: 1,
     backgroundColor: Colors.white,
-    borderRadius: 12,
-    padding: 17,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
   },
-  examNameHeader: {
+  header: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 13,
+    shadowColor: 'rgba(0,0,0,0.05)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 16,
   },
-  examNameLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.textSecondary,
-    letterSpacing: 0.7,
-    textTransform: 'uppercase',
-  },
-  examNameInput: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    padding: 0,
-  },
-  section: { marginBottom: 20 },
-  fieldLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.textSecondary,
-    letterSpacing: 0.7,
-    textTransform: 'uppercase',
-    marginBottom: 12,
-  },
-  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  pill: {
+  headerSide: {
+    minWidth: 72,
     height: 40,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    alignItems: 'center',
     justifyContent: 'center',
   },
-  pillInactive: {
-    backgroundColor: Colors.white,
-    borderWidth: 1,
-    borderColor: '#DBDBDB',
+  headerTitle: {
+    fontSize: 18,
+    lineHeight: 28,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    textAlign: 'center',
   },
-  pillActive: {
-    backgroundColor: Colors.white,
-    borderWidth: 2,
-    borderColor: Colors.primary,
+  saveText: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '600',
+    color: Colors.primary,
+    textAlign: 'right',
   },
-  pillText: { fontSize: 14 },
-  pillTextInactive: { fontWeight: '500', color: '#8C95A1' },
-  pillTextActive: { fontWeight: '700', color: Colors.primary },
-  durationRow: {
-    flexDirection: 'row',
+  progressWrap: {
+    height: 51,
     alignItems: 'center',
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.gray20,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    justifyContent: 'center',
+    position: 'relative',
   },
-  durationBtn: {
+  progressLineActive: {
+    position: 'absolute',
+    left: 55,
+    right: 200,
+    top: 15,
+    height: 2,
+    backgroundColor: Colors.gray20,
+  },
+  progressLineInactive: {
+    position: 'absolute',
+    left: 194,
+    right: 47,
+    top: 15,
+    height: 2,
+    backgroundColor: Colors.gray20,
+  },
+  progressStepActive: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    alignItems: 'center',
+  },
+  progressStepMiddle: {
+    position: 'absolute',
+    left: '46%',
+    top: 0,
+    marginLeft: -16,
+    alignItems: 'center',
+  },
+  progressStepRight: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    alignItems: 'center',
+  },
+  progressCircleActive: {
     width: 32,
     height: 32,
-    borderRadius: 10,
-    backgroundColor: Colors.gray10,
+    borderRadius: 16,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: 'rgba(33,196,93,0.15)',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
+  },
+  progressCircleInactive: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: Colors.gray20,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  durationValue: { flex: 1, alignItems: 'center', flexDirection: 'row', justifyContent: 'center' },
-  durationNum: { fontSize: 24, fontWeight: '700', color: Colors.textPrimary },
-  durationUnit: { fontSize: 14, fontWeight: '500', color: Colors.textSecondary },
-  continueBtn: {
+  progressCircleActiveText: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '700',
+    color: Colors.white,
+  },
+  progressCircleInactiveText: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+  progressLabelActive: {
+    marginTop: 4,
+    fontSize: 10,
+    lineHeight: 15,
+    fontWeight: '700',
+    color: Colors.primary,
+  },
+  progressLabelInactive: {
+    marginTop: 4,
+    fontSize: 10,
+    lineHeight: 15,
+    fontWeight: '500',
+    color: '#94A3B8',
+  },
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 128,
+  },
+  contentCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    paddingHorizontal: 32,
+    paddingTop: 32,
+    paddingBottom: 48,
+    shadowColor: 'rgba(22,29,22,0.06)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 1,
+    shadowRadius: 32,
+    elevation: 4,
+  },
+  copyBlock: {
+    marginBottom: 32,
+  },
+  copyTitle: {
+    fontSize: 24,
+    lineHeight: 32,
+    fontWeight: '700',
+    color: '#161D16',
+    marginBottom: 8,
+  },
+  copyBody: {
+    fontSize: 14,
+    lineHeight: 23,
+    color: '#3D4A3D',
+  },
+  form: {
+    gap: 32,
+  },
+  formGroup: {
+    gap: 8,
+  },
+  label: {
+    paddingLeft: 4,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '600',
+    color: '#3D4A3D',
+    letterSpacing: 1.2,
+  },
+  selector: {
+    height: 46,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  selectorText: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: Colors.textPrimary,
+  },
+  inputWrap: {
+    height: 56,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    lineHeight: 24,
+    color: Colors.textPrimary,
+  },
+  actionRow: {
+    alignItems: 'flex-end',
+    paddingTop: 16,
+  },
+  continueButton: {
+    width: 236,
+    height: 52,
+    borderRadius: 12,
+    backgroundColor: Colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: Colors.primary,
-    height: 52,
-    borderRadius: 24,
-    shadowColor: 'rgba(33,196,93,0.3)',
-    shadowOffset: { width: 0, height: 10 },
+    shadowColor: 'rgba(0,0,0,0.1)',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
-    shadowRadius: 15,
-    elevation: 4,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  continueBtnText: { fontSize: 16, fontWeight: '700', color: Colors.white },
+  continueText: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '600',
+    color: Colors.white,
+  },
 });
