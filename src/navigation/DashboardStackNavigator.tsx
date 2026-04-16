@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MainTabNavigator } from './MainTabNavigator';
 import { KhoDeDetailScreen } from '../screens/khoDe/KhoDeDetailScreen';
+import { KhoDeExamDetailScreen } from '../screens/khoDe/KhoDeExamDetailScreen';
 import { TaoDeThiScreen } from '../screens/thi/TaoDeThiScreen';
 import { SoanThaoCauHoiScreen } from '../screens/thi/SoanThaoCauHoiScreen';
 import { LamThuDeThiScreen } from '../screens/thi/LamThuDeThiScreen';
@@ -9,6 +10,7 @@ import { ThemCauHoiScreen } from '../screens/thi/ThemCauHoiScreen';
 import { ChinhSuaCauHoiScreen } from '../screens/thi/ChinhSuaCauHoiScreen';
 import { PhatDeScreen } from '../screens/thi/PhatDeScreen';
 import { ThietLapDeThiScreen } from '../screens/thi/ThietLapDeThiScreen';
+import { PhatDeThanhCongScreen } from '../screens/thi/PhatDeThanhCongScreen';
 import { AIGeneratorScreen } from '../screens/aiGenerator/AIGeneratorScreen';
 import { AILoadingScreen } from '../screens/aiGenerator/AILoadingScreen';
 import { ThongKeScreen } from '../screens/thongKe/ThongKeScreen';
@@ -24,6 +26,7 @@ export const DashboardStackNavigator: React.FC = () => {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTabs" component={MainTabNavigator} />
       <Stack.Screen name="KhoDeDetail" component={KhoDeDetailScreen} />
+      <Stack.Screen name="KhoDeExamDetail" component={KhoDeExamDetailScreen} />
       <Stack.Screen name="TaoDeThi" component={TaoDeThiScreen} />
       <Stack.Screen name="SoanThaoCauHoi" component={SoanThaoCauHoiScreen} />
       <Stack.Screen name="LamThuDeThi" component={LamThuDeThiScreen} />
@@ -31,6 +34,7 @@ export const DashboardStackNavigator: React.FC = () => {
       <Stack.Screen name="ChinhSuaCauHoi" component={ChinhSuaCauHoiScreen} />
       <Stack.Screen name="PhatDe" component={PhatDeScreen} />
       <Stack.Screen name="ThietLapDeThi" component={ThietLapDeThiScreen} />
+      <Stack.Screen name="PhatDeThanhCong" component={PhatDeThanhCongScreen} />
       <Stack.Screen name="AIGenerator" component={AIGeneratorScreen} />
       <Stack.Screen name="AILoading" component={AILoadingScreen} />
       <Stack.Screen name="ThongKe" component={ThongKeScreen} />

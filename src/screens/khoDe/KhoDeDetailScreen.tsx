@@ -12,7 +12,8 @@ interface Props {
   route: RouteProp<DashboardStackParamList, 'KhoDeDetail'>;
 }
 
-type TabKey = 'open' | 'draft' | 'closed';
+type TabKey = 'all' | 'open' | 'draft' | 'closed';
+type ExamStatus = Exclude<TabKey, 'all'>;
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'all', label: 'Tất cả' },
@@ -21,15 +22,15 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'closed', label: 'Đã đóng' },
 ];
 
-const MOCK_EXAMS: Record<string, { id: string; title: string; subject: string; date: string; status: TabKey; subjectColor: string; studentCount: number }[]> = {
+const MOCK_EXAMS: Record<string, { id: string; title: string; subject: string; date: string; status: ExamStatus; subjectColor: string; studentCount: number }[]> = {
   open: [
-    { id: '1', title: 'Kiểm tra 15 phút - Chương 1', subject: 'Địa lý 6', date: '20/10/2025', status: 'open', subjectColor: '#DCFCE7', studentCount: 45 },
+    { id: 'exam-2', title: 'Kiểm tra Địa lý cuối tuần', subject: 'Địa lý 6', date: '22/10/2025', status: 'open', subjectColor: '#DCFCE7', studentCount: 45 },
   ],
   draft: [
-    { id: '2', title: 'Đề thi giữa kỳ I - Hóa học', subject: 'Hóa học 10', date: '15/10/2025', status: 'draft', subjectColor: '#FFF7ED', studentCount: 0 },
+    { id: 'exam-3', title: 'Đề thi Hóa học giữa kỳ I', subject: 'Hóa học 10', date: '15/10/2025', status: 'draft', subjectColor: '#FFF7ED', studentCount: 0 },
   ],
   closed: [
-    { id: '3', title: 'Ôn tập văn học hiện đại', subject: 'Ngữ Văn 11', date: '10/10/2025', status: 'closed', subjectColor: '#EFF6FF', studentCount: 38 },
+    { id: 'exam-4', title: 'Ôn tập Ngữ văn hiện đại', subject: 'Ngữ văn 11', date: '10/10/2025', status: 'closed', subjectColor: '#EFF6FF', studentCount: 38 },
   ],
 };
 
@@ -119,7 +120,7 @@ export const KhoDeDetailScreen: React.FC<Props> = ({ navigation, route }) => {
                 <TouchableOpacity
                   key={exam.id}
                   style={styles.examCard}
-                  onPress={() => navigation.navigate('SoanThaoCauHoi', { examId: exam.id })}
+                  onPress={() => navigation.navigate('KhoDeExamDetail', { examId: exam.id })}
                   activeOpacity={0.8}
                 >
                   <TouchableOpacity style={styles.moreBtn} onPress={() => {}}>

@@ -95,7 +95,7 @@ export const KhoDeScreen: React.FC<Props> = ({ navigation }) => {
                         result ? "KetQuaBaiThi" : "HocSinhLamBai",
                         { examId: exam.id }
                       )
-                    : navigation.navigate("KhoDeDetail", { tab: exam.status })
+                    : navigation.navigate("KhoDeExamDetail", { examId: exam.id })
                 }
                 style={styles.examCard}
               >

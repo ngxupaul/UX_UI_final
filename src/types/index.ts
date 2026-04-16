@@ -24,10 +24,19 @@ export type MainTabParamList = {
 export type DashboardStackParamList = {
   Dashboard: undefined;
   KhoDeDetail: { tab?: 'open' | 'draft' | 'closed' };
+  KhoDeExamDetail: { examId: string };
   TaoDeThi: undefined;
   TaoDeThiChiTiet: undefined;
   PhatDe: { examId: string };
   ThietLapDeThi: { examId?: string };
+  PhatDeThanhCong: {
+    selectedClasses: Array<{
+      code: string;
+      name: string;
+      students: number;
+      selected: boolean;
+    }>;
+  };
   TaoDeThuCong: undefined;
   SoanThaoCauHoi: { examId?: string };
   LamThuDeThi: undefined;

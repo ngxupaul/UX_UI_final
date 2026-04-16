@@ -16,6 +16,25 @@ export const ThietLapDeThiScreen: React.FC<Props> = ({ navigation }) => {
   const { draftExam } = useDraftExam();
   const [passwordEnabled, setPasswordEnabled] = useState(false);
   const [password, setPassword] = useState('123456');
+  const [classrooms, setClassrooms] = useState([
+    { code: '10A1', name: 'Lớp 10A1', students: 42, selected: true },
+    { code: '10A2', name: 'Lớp 10A2', students: 38, selected: true },
+    { code: '11B5', name: 'Lớp 11B5', students: 40, selected: false },
+    { code: '12C1', name: 'Lớp 12C1', students: 35, selected: false },
+  ]);
+
+  const toggleClass = (code: string) => {
+    setClassrooms((current) =>
+      current.map((item) =>
+        item.code === code ? { ...item, selected: !item.selected } : item
+      )
+    );
+  };
+
+  const toggleSelectAll = () => {
+    const shouldSelectAll = classrooms.some((item) => !item.selected);
+    setClassrooms((current) => current.map((item) => ({ ...item, selected: shouldSelectAll })));
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -50,17 +69,19 @@ export const ThietLapDeThiScreen: React.FC<Props> = ({ navigation }) => {
               <Ionicons name="people" size={18} color="#1E293B" />
               <Text style={styles.sectionTitle}>Giao cho lớp</Text>
             </View>
-            <TouchableOpacity><Text style={styles.selectAll}>Chọn tất cả</Text></TouchableOpacity>
+            <TouchableOpacity onPress={toggleSelectAll}>
+              <Text style={styles.selectAll}>Chọn tất cả</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.classGrid}>
-            {[
-              { code: '10A1', name: 'Lớp 10A1', students: 42, selected: true },
-              { code: '10A2', name: 'Lớp 10A2', students: 38, selected: true },
-              { code: '11B5', name: 'Lớp 11B5', students: 40, selected: false },
-              { code: '12C1', name: 'Lớp 12C1', students: 35, selected: false },
-            ].map((cls) => (
-              <View key={cls.code} style={[styles.classCard, cls.selected && styles.classCardSelected]}>
+            {classrooms.map((cls) => (
+              <TouchableOpacity
+                key={cls.code}
+                activeOpacity={0.85}
+                onPress={() => toggleClass(cls.code)}
+                style={[styles.classCard, cls.selected && styles.classCardSelected]}
+              >
                 <View style={styles.classHeader}>
                   <View style={[styles.classBadge, cls.selected && styles.classBadgeSelected]}>
                     <Text style={[styles.classBadgeText, cls.selected && styles.classBadgeTextSelected]}>{cls.code}</Text>
@@ -71,7 +92,7 @@ export const ThietLapDeThiScreen: React.FC<Props> = ({ navigation }) => {
                 </View>
                 <Text style={[styles.className, cls.selected && styles.classNameSelected]}>{cls.name}</Text>
                 <Text style={styles.classStudentCount}>{cls.students} Học sinh</Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
@@ -129,7 +150,14 @@ export const ThietLapDeThiScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* Bottom CTA */}
       <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.publishBtn}>
+        <TouchableOpacity
+          style={styles.publishBtn}
+          onPress={() =>
+            navigation.navigate('PhatDeThanhCong', {
+              selectedClasses: classrooms,
+            })
+          }
+        >
           <Ionicons name="paper-plane-outline" size={16} color={Colors.white} />
           <Text style={styles.publishBtnText}>Phát đề ngay</Text>
         </TouchableOpacity>
