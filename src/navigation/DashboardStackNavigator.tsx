@@ -4,6 +4,7 @@ import { MainTabNavigator } from './MainTabNavigator';
 import { KhoDeDetailScreen } from '../screens/khoDe/KhoDeDetailScreen';
 import { TaoDeThiScreen } from '../screens/thi/TaoDeThiScreen';
 import { SoanThaoCauHoiScreen } from '../screens/thi/SoanThaoCauHoiScreen';
+import { LamThuDeThiScreen } from '../screens/thi/LamThuDeThiScreen';
 import { ThemCauHoiScreen } from '../screens/thi/ThemCauHoiScreen';
 import { ChinhSuaCauHoiScreen } from '../screens/thi/ChinhSuaCauHoiScreen';
 import { PhatDeScreen } from '../screens/thi/PhatDeScreen';
@@ -25,6 +26,7 @@ export const DashboardStackNavigator: React.FC = () => {
       <Stack.Screen name="KhoDeDetail" component={KhoDeDetailScreen} />
       <Stack.Screen name="TaoDeThi" component={TaoDeThiScreen} />
       <Stack.Screen name="SoanThaoCauHoi" component={SoanThaoCauHoiScreen} />
+      <Stack.Screen name="LamThuDeThi" component={LamThuDeThiScreen} />
       <Stack.Screen name="ThemCauHoi" component={ThemCauHoiScreen} />
       <Stack.Screen name="ChinhSuaCauHoi" component={ChinhSuaCauHoiScreen} />
       <Stack.Screen name="PhatDe" component={PhatDeScreen} />

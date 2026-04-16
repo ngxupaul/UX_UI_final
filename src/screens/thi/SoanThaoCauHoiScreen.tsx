@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
-import { DeleteConfirmDialog } from '../../components';
+import { DeleteConfirmDialog, ExamFlowHeader } from '../../components';
 import { useDraftExam } from '../../context/DraftExamContext';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { DashboardStackParamList } from '../../types';
@@ -11,37 +11,6 @@ import type { DashboardStackParamList } from '../../types';
 interface Props {
   navigation: NativeStackNavigationProp<DashboardStackParamList>;
 }
-
-// 3-step progress bar: step 2 = Câu hỏi (active)
-const WizardStep = () => (
-  <View style={styles.wizardWrap}>
-    {/* Step 1: Thông tin */}
-    <View style={styles.wizardLeft}>
-      <View style={styles.stepCircle}>
-        <Text style={styles.stepDone}>✓</Text>
-      </View>
-      <Text style={styles.stepLabel}>Thông tin</Text>
-    </View>
-    {/* Line */}
-    <View style={styles.wizardLineFilled} />
-    {/* Step 2: Câu hỏi */}
-    <View style={styles.wizardCenter}>
-      <View style={styles.stepCircleActive}>
-        <Text style={styles.stepNum}>2</Text>
-      </View>
-      <Text style={styles.stepLabelActive}>Câu hỏi</Text>
-    </View>
-    {/* Line */}
-    <View style={styles.wizardLineEmpty} />
-    {/* Step 3: Cài đặt */}
-    <View style={styles.wizardRight}>
-      <View style={styles.stepCirclePending}>
-        <Text style={styles.stepNumPending}>3</Text>
-      </View>
-      <Text style={styles.stepLabelPending}>Cài đặt</Text>
-    </View>
-  </View>
-);
 
 export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
   const { draftExam, deleteQuestion } = useDraftExam();
@@ -63,19 +32,12 @@ export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteTarget(null)}
       />
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={18} color={Colors.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Tạo đề thi mới</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.saveDraft}>Lưu nháp</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Wizard */}
-      <WizardStep />
+      <ExamFlowHeader
+        title="Tạo đề thi mới"
+        currentStep={2}
+        onBack={() => navigation.goBack()}
+        onSaveDraft={() => navigation.goBack()}
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* List header */}
@@ -159,6 +121,9 @@ export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.actionBtnTextMuted}>Xóa</Text>
               </TouchableOpacity>
             </View>
+            <TouchableOpacity style={styles.cardMenuBtn}>
+              <Ionicons name="ellipsis-vertical" size={14} color={Colors.gray30} />
+            </TouchableOpacity>
           </View>
         ))}
 
@@ -173,7 +138,7 @@ export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.addBtnGreen}
-            onPress={() => navigation.navigate('AIGenerator')}
+            onPress={() => navigation.navigate('LamThuDeThi')}
           >
             <Ionicons name="document-text-outline" size={20} color={Colors.white} />
             <Text style={styles.addBtnGreenText}>Làm thử</Text>
@@ -183,7 +148,7 @@ export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
         {/* Publish button */}
         <TouchableOpacity
           style={styles.publishBtn}
-          onPress={() => navigation.navigate('PhatDe', { examId: draftExam.examId })}
+          onPress={() => navigation.navigate('ThietLapDeThi', { examId: draftExam.examId })}
         >
           <Ionicons name="paper-plane-outline" size={18} color={Colors.white} />
           <Text style={styles.publishBtnText}>Phát hành đề thi</Text>
@@ -195,79 +160,7 @@ export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC' },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-  },
-  backBtn: { padding: 4 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
-  saveDraft: { fontSize: 14, fontWeight: '600', color: Colors.primary },
-  wizardWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-  },
-  wizardLeft: { alignItems: 'center' },
-  wizardCenter: { alignItems: 'center' },
-  wizardRight: { alignItems: 'center' },
-  stepCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepDone: { color: Colors.white, fontSize: 14, fontWeight: '700' },
-  stepCircleActive: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 4,
-    borderColor: 'rgba(33,196,93,0.15)',
-  },
-  stepCirclePending: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.gray20,
-    borderWidth: 1,
-    borderColor: Colors.gray30,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepNum: { color: Colors.white, fontSize: 14, fontWeight: '700' },
-  stepNumPending: { color: Colors.textMuted, fontSize: 14, fontWeight: '700' },
-  stepLabel: { fontSize: 10, fontWeight: '500', color: Colors.primary, marginTop: 4 },
-  stepLabelActive: { fontSize: 10, fontWeight: '700', color: Colors.primary, marginTop: 4 },
-  stepLabelPending: { fontSize: 10, fontWeight: '500', color: Colors.textMuted, marginTop: 4 },
-  wizardLineFilled: {
-    width: 80,
-    height: 2,
-    backgroundColor: Colors.primary,
-    marginHorizontal: 8,
-    opacity: 0.8,
-  },
-  wizardLineEmpty: {
-    width: 80,
-    height: 2,
-    backgroundColor: Colors.gray20,
-    marginHorizontal: 8,
-  },
-  scrollContent: { padding: 16, paddingBottom: 120 },
+  scrollContent: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 108 },
   listHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -309,6 +202,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.borderLight,
     position: 'relative',
+    shadowColor: 'rgba(0,0,0,0.05)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    elevation: 1,
   },
   questionCardCompact: {
     paddingVertical: 14,
@@ -363,9 +261,15 @@ const styles = StyleSheet.create({
   qActions: {
     position: 'absolute',
     top: 16,
-    right: 16,
+    right: 34,
     flexDirection: 'row',
     gap: 16,
+  },
+  cardMenuBtn: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    padding: 2,
   },
   actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   actionBtnText: { fontSize: 12, fontWeight: '600', color: '#64748B' },

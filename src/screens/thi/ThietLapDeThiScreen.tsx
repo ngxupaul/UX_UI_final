@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { ExamFlowHeader } from '../../components';
+import { useDraftExam } from '../../context/DraftExamContext';
 import { Colors } from '../../theme';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { DashboardStackParamList } from '../../types';
@@ -10,49 +12,25 @@ interface Props {
   navigation: NativeStackNavigationProp<DashboardStackParamList>;
 }
 
-// 3-step wizard step 3
-const WizardStep3 = () => (
-  <View style={styles.wizardWrap}>
-    <View style={styles.wizardLeft}>
-      <View style={styles.stepCircle}><Text style={styles.stepDone}>✓</Text></View>
-      <Text style={styles.stepLabel}>Thông tin</Text>
-    </View>
-    <View style={styles.wizardLineFilled} />
-    <View style={styles.wizardLeft}>
-      <View style={styles.stepCircle}><Text style={styles.stepDone}>✓</Text></View>
-      <Text style={styles.stepLabel}>Câu hỏi</Text>
-    </View>
-    <View style={styles.wizardLineFilled} />
-    <View style={styles.wizardCenter}>
-      <View style={styles.stepCircleActive}><Text style={styles.stepNum}>3</Text></View>
-      <Text style={styles.stepLabelActive}>Cài đặt</Text>
-    </View>
-  </View>
-);
-
 export const ThietLapDeThiScreen: React.FC<Props> = ({ navigation }) => {
+  const { draftExam } = useDraftExam();
   const [passwordEnabled, setPasswordEnabled] = useState(false);
   const [password, setPassword] = useState('123456');
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={18} color={Colors.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Phát hành đề thi</Text>
-        <TouchableOpacity><Text style={styles.saveDraft}>Lưu nháp</Text></TouchableOpacity>
-      </View>
-
-      {/* Wizard step 3 */}
-      <WizardStep3 />
+      <ExamFlowHeader
+        title="Phát hành đề thi"
+        currentStep={3}
+        onBack={() => navigation.goBack()}
+        onSaveDraft={() => navigation.goBack()}
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* QR Card */}
         <View style={styles.qrCard}>
           <Text style={styles.qrTitle}>Quét mã để làm bài</Text>
-          <Text style={styles.qrExamName}>Kiểm tra 15 phút - Chương 1</Text>
+          <Text style={styles.qrExamName}>{draftExam.title}</Text>
           <View style={styles.qrBox}>
             <View style={styles.qrBg} />
           </View>
@@ -117,7 +95,7 @@ export const ThietLapDeThiScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             </View>
             <View style={styles.durationPicker}>
-              <Text style={styles.durationValue}>45</Text>
+              <Text style={styles.durationValue}>{draftExam.duration}</Text>
               <Text style={styles.durationUnit}>phút</Text>
               <Ionicons name="chevron-down" size={16} color={Colors.textSecondary} />
             </View>
@@ -140,11 +118,11 @@ export const ThietLapDeThiScreen: React.FC<Props> = ({ navigation }) => {
                 )}
               </View>
             </View>
-            <View style={styles.switchWrap}>
+            <TouchableOpacity style={styles.switchWrap} onPress={() => setPasswordEnabled((value) => !value)}>
               <View style={[styles.switchTrack, passwordEnabled && styles.switchTrackOn]}>
-                {passwordEnabled && <View style={styles.switchThumb} />}
+                <View style={[styles.switchThumb, passwordEnabled && styles.switchThumbOn]} />
               </View>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -162,31 +140,7 @@ export const ThietLapDeThiScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.screenBg },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 12,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderBottomWidth: 1, borderBottomColor: Colors.borderLight,
-  },
-  backBtn: { padding: 4 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
-  saveDraft: { fontSize: 14, fontWeight: '600', color: Colors.primary },
-  wizardWrap: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    paddingVertical: 16,
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1, borderBottomColor: Colors.borderLight,
-  },
-  wizardLeft: { alignItems: 'center' },
-  wizardCenter: { alignItems: 'center' },
-  stepCircle: { width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center' },
-  stepDone: { color: Colors.white, fontSize: 14, fontWeight: '700' },
-  stepCircleActive: { width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 4, borderColor: 'rgba(33,196,93,0.15)' },
-  stepNum: { color: Colors.white, fontSize: 14, fontWeight: '700' },
-  stepLabel: { fontSize: 10, fontWeight: '500', color: Colors.primary, marginTop: 4 },
-  stepLabelActive: { fontSize: 10, fontWeight: '700', color: Colors.primary, marginTop: 4 },
-  wizardLineFilled: { width: 60, height: 2, backgroundColor: Colors.primary, marginHorizontal: 6, opacity: 0.8 },
-  scrollContent: { padding: 16, paddingBottom: 100 },
+  scrollContent: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 100 },
   qrCard: {
     backgroundColor: Colors.white, borderRadius: 16, padding: 24, alignItems: 'center',
     borderWidth: 1, borderColor: Colors.gray20, marginBottom: 24,
@@ -234,10 +188,11 @@ const styles = StyleSheet.create({
   durationPicker: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.gray10, paddingHorizontal: 13, paddingVertical: 9, borderRadius: 12, borderWidth: 1, borderColor: Colors.gray20, gap: 4 },
   durationValue: { fontSize: 14, fontWeight: '700', color: '#1E293B' },
   durationUnit: { fontSize: 12, fontWeight: '500', color: '#64748B' },
-  switchWrap: { justifyContent: 'center' },
+  switchWrap: { justifyContent: 'center', padding: 4 },
   switchTrack: { width: 44, height: 24, borderRadius: 12, backgroundColor: Colors.gray20, padding: 2, justifyContent: 'center' },
   switchTrackOn: { backgroundColor: Colors.primary },
-  switchThumb: { alignSelf: 'flex-end', width: 20, height: 20, borderRadius: 10, backgroundColor: Colors.white },
+  switchThumb: { alignSelf: 'flex-start', width: 20, height: 20, borderRadius: 10, backgroundColor: Colors.white },
+  switchThumbOn: { alignSelf: 'flex-end' },
   bottomBar: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: Colors.white, borderTopWidth: 1, borderTopColor: Colors.gray20 },
   publishBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.primary, paddingVertical: 14, borderRadius: 16, shadowColor: 'rgba(34,197,94,0.3)', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 1, shadowRadius: 15, elevation: 4 },
   publishBtnText: { fontSize: 16, fontWeight: '700', color: Colors.white },

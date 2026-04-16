@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useDraftExam } from '../../context/DraftExamContext';
 import { Colors } from '../../theme';
+import { ExamFlowHeader } from '../../components';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { DashboardStackParamList } from '../../types';
 
@@ -78,16 +79,12 @@ export const ChinhSuaCauHoiScreen: React.FC<Props> = ({ navigation, route }) => 
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={16} color={Colors.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Biên soạn Câu hỏi</Text>
-        <TouchableOpacity onPress={handleSave}>
-          <Text style={styles.saveBtn}>Lưu</Text>
-        </TouchableOpacity>
-      </View>
+      <ExamFlowHeader
+        title="Biên soạn Câu hỏi"
+        saveLabel="Lưu"
+        onBack={() => navigation.goBack()}
+        onSaveDraft={handleSave}
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Question content section */}
@@ -198,23 +195,7 @@ export const ChinhSuaCauHoiScreen: React.FC<Props> = ({ navigation, route }) => 
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.screenBg },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 17,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-  },
-  backBtn: {
-    width: 32, height: 32, borderRadius: 16,
-    backgroundColor: Colors.gray10, alignItems: 'center', justifyContent: 'center',
-  },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: '#1E293B' },
-  saveBtn: { fontSize: 16, fontWeight: '600', color: Colors.primary },
-  scrollContent: { paddingBottom: 200 },
+  scrollContent: { paddingTop: 12, paddingBottom: 200 },
   section: { paddingHorizontal: 20, paddingTop: 20 },
   sectionHeader: {
     flexDirection: 'row',

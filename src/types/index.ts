@@ -30,6 +30,7 @@ export type DashboardStackParamList = {
   ThietLapDeThi: { examId?: string };
   TaoDeThuCong: undefined;
   SoanThaoCauHoi: { examId?: string };
+  LamThuDeThi: undefined;
   ThemCauHoi: { examId?: string; questionId?: string };
   ChinhSuaCauHoi: { examId: string; questionId: string };
   AIGenerator: undefined;

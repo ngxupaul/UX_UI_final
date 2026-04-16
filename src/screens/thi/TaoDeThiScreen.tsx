@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useDraftExam } from '../../context/DraftExamContext';
 import { Colors } from '../../theme';
+import { ExamFlowHeader } from '../../components';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { DashboardStackParamList } from '../../types';
 
@@ -36,47 +37,17 @@ export const TaoDeThiScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={18} color={Colors.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Tạo đề thi mới</Text>
-        <TouchableOpacity
-          onPress={() => {
-            const selectedSubject =
-              subjects.find((subject) => subject.selected)?.label ?? draftExam.subject;
-            updateExamInfo({ title, duration, subject: selectedSubject });
-            navigation.goBack();
-          }}
-        >
-          <Text style={styles.saveDraft}>Lưu nháp</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Wizard step 1 */}
-      <View style={styles.wizardWrap}>
-        <View style={styles.wizardLeft}>
-          <View style={styles.stepCircleActive}>
-            <Text style={styles.stepNum}>1</Text>
-          </View>
-          <Text style={styles.stepLabelActive}>Thông tin</Text>
-        </View>
-        <View style={styles.wizardLine} />
-        <View style={styles.wizardRight}>
-          <View style={styles.stepCirclePending}>
-            <Text style={styles.stepNumPending}>2</Text>
-          </View>
-          <Text style={styles.stepLabelPending}>Câu hỏi</Text>
-        </View>
-        <View style={styles.wizardLine} />
-        <View style={styles.wizardRight}>
-          <View style={styles.stepCirclePending}>
-            <Text style={styles.stepNumPending}>3</Text>
-          </View>
-          <Text style={styles.stepLabelPending}>Cài đặt</Text>
-        </View>
-      </View>
+      <ExamFlowHeader
+        title="Tạo đề thi mới"
+        currentStep={1}
+        onBack={() => navigation.goBack()}
+        onSaveDraft={() => {
+          const selectedSubject =
+            subjects.find((subject) => subject.selected)?.label ?? draftExam.subject;
+          updateExamInfo({ title, duration, subject: selectedSubject });
+          navigation.goBack();
+        }}
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {/* Exam name card */}
@@ -151,56 +122,7 @@ export const TaoDeThiScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.screenBg },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-  },
-  backBtn: { padding: 4 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
-  saveDraft: { fontSize: 14, fontWeight: '600', color: Colors.primary },
-  wizardWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-  },
-  wizardLeft: { alignItems: 'center' },
-  wizardRight: { alignItems: 'center' },
-  stepCircleActive: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 4,
-    borderColor: 'rgba(33,196,93,0.15)',
-  },
-  stepCirclePending: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.gray20,
-    borderWidth: 1,
-    borderColor: Colors.gray30,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepNum: { color: Colors.white, fontSize: 14, fontWeight: '700' },
-  stepNumPending: { color: Colors.textMuted, fontSize: 14, fontWeight: '700' },
-  stepLabelActive: { fontSize: 10, fontWeight: '700', color: Colors.primary, marginTop: 4 },
-  stepLabelPending: { fontSize: 10, fontWeight: '500', color: Colors.textMuted, marginTop: 4 },
-  wizardLine: { width: 60, height: 2, backgroundColor: Colors.gray20, marginHorizontal: 8 },
-  scroll: { padding: 16, paddingBottom: 120 },
+  scroll: { paddingHorizontal: 16, paddingTop: 24, paddingBottom: 120 },
   examNameCard: {
     backgroundColor: Colors.white,
     borderRadius: 12,
