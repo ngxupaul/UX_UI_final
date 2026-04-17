@@ -27,14 +27,15 @@ export const HocSinhLamBaiScreen: React.FC<Props> = ({ navigation, route }) => {
   const [answers, setAnswers] = useState<Record<string, number>>({});
 
   const question = questions[currentIndex];
-  const selectedIndex = answers[question.id];
+  const selectedIndex = question ? answers[question.id] : undefined;
 
   const progress = useMemo(
-    () => (currentIndex + 1) / questions.length,
+    () => (questions.length ? (currentIndex + 1) / questions.length : 0),
     [currentIndex, questions.length]
   );
 
   const selectAnswer = (index: number) => {
+    if (!question) return;
     setAnswers((previous) => ({ ...previous, [question.id]: index }));
   };
 
@@ -55,6 +56,41 @@ export const HocSinhLamBaiScreen: React.FC<Props> = ({ navigation, route }) => {
 
     setCurrentIndex((previous) => previous - 1);
   };
+
+  if (!question) {
+    return (
+      <View style={styles.wrapper}>
+        <SafeAreaView style={styles.safeArea} edges={["top"]}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerIconBtn}>
+              <Ionicons name="close" size={22} color={Colors.textPrimary} />
+            </TouchableOpacity>
+
+            <View style={styles.headerCenter}>
+              <Text style={styles.headerTitle}>Bài thi</Text>
+              <Text style={styles.headerSubtitle}>{currentUser.name}</Text>
+            </View>
+
+            <View style={styles.headerIconBtn} />
+          </View>
+        </SafeAreaView>
+
+        <View style={styles.emptyState}>
+          <Ionicons name="document-text-outline" size={44} color="#94A3B8" />
+          <Text style={styles.emptyTitle}>Chưa có câu hỏi luyện tập</Text>
+          <Text style={styles.emptyDescription}>
+            Đề này chưa có dữ liệu câu hỏi mẫu. Hãy chọn đề khác để tiếp tục.
+          </Text>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.emptyButton}
+          >
+            <Text style={styles.emptyButtonText}>Quay lại</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.wrapper}>
@@ -231,6 +267,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 20,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 36,
+    gap: 12,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    lineHeight: 28,
+    fontWeight: "700",
+    color: Colors.textPrimary,
+    textAlign: "center",
+  },
+  emptyDescription: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: Colors.textSecondary,
+    textAlign: "center",
+  },
+  emptyButton: {
+    marginTop: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 999,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+  },
+  emptyButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: Colors.white,
   },
   mainCard: {
     minHeight: 620,

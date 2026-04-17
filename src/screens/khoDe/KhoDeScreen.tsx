@@ -48,7 +48,7 @@ export const KhoDeScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>
-            {isStudent ? "Bài thi của tôi" : "Kho đề thi"}
+            {isStudent ? "Ôn tập" : "Kho đề thi"}
           </Text>
           {!isStudent && (
             <TouchableOpacity
@@ -77,9 +77,7 @@ export const KhoDeScreen: React.FC<Props> = ({ navigation }) => {
           {filtered.map((exam) => {
             const result = getResultForStudentExam(currentUser.id, exam.id);
             const statusLabel = isStudent
-              ? result
-                ? "Đã nộp"
-                : "Sẵn sàng"
+              ? "Luyện tập"
               : exam.status === "open"
                 ? "Đang mở"
                 : exam.status === "draft"
@@ -91,10 +89,7 @@ export const KhoDeScreen: React.FC<Props> = ({ navigation }) => {
                 key={exam.id}
                 onPress={() =>
                   isStudent
-                    ? navigation.navigate(
-                        result ? "KetQuaBaiThi" : "HocSinhLamBai",
-                        { examId: exam.id }
-                      )
+                    ? navigation.navigate("HocSinhLamBai", { examId: exam.id })
                     : navigation.navigate("KhoDeExamDetail", { examId: exam.id })
                 }
                 style={styles.examCard}
@@ -113,11 +108,14 @@ export const KhoDeScreen: React.FC<Props> = ({ navigation }) => {
                 </Text>
                 <Text style={styles.examMeta}>
                   {isStudent
-                    ? result
-                      ? `Điểm gần nhất: ${result.score}/${result.total}`
-                      : `Được giao ngày ${exam.updatedAt}`
+                    ? `Nhấn để bắt đầu luyện tập • ${exam.duration} phút`
                     : `Cập nhật ${exam.updatedAt}`}
                 </Text>
+                {isStudent && result ? (
+                  <Text style={styles.studentHintText}>
+                    Điểm gần nhất: {result.score}/{result.total}
+                  </Text>
+                ) : null}
               </TouchableOpacity>
             );
           })}
@@ -196,4 +194,9 @@ const styles = StyleSheet.create({
   statusChipText: { fontSize: 12, fontWeight: "600", color: "#64748B" },
   examTitle: { fontSize: 16, fontWeight: "700", color: Colors.textPrimary },
   examMeta: { fontSize: 13, color: Colors.textSecondary },
+  studentHintText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: Colors.primary,
+  },
 });

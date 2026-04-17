@@ -123,7 +123,7 @@ export const PhatDeThanhCongScreen: React.FC<Props> = ({ navigation, route }) =>
           >
             <Text style={styles.secondaryButtonText}>Xem kho đề</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.navigate('MainTabs')}>
+          <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.navigate('HomeTabs')}>
             <Text style={styles.primaryButtonText}>Về trang chủ</Text>
           </TouchableOpacity>
         </View>

@@ -6,6 +6,7 @@ import { KhoDeScreen } from '../screens/khoDe/KhoDeScreen';
 import { LopHocScreen } from '../screens/lopHoc/LopHocScreen';
 import { CaiDatScreen } from '../screens/caiDat/CaiDatScreen';
 import { ThongKeScreen } from '../screens/thongKe/ThongKeScreen';
+import { ThongBaoScreen } from '../screens/thongBao/ThongBaoScreen';
 import { useMockSession } from '../context/MockSessionContext';
 import { Colors } from '../theme';
 import type { MainTabParamList } from '../types';
@@ -41,6 +42,7 @@ export const MainTabNavigator: React.FC = () => {
           switch (route.name) {
             case 'DashboardTab': icon = focused ? 'home' : 'home-outline'; break;
             case 'KhoDeTab': icon = focused ? 'folder-open' : 'folder-open-outline'; break;
+            case 'ThongBaoTab': icon = focused ? 'notifications' : 'notifications-outline'; break;
             case 'LopHocTab': icon = focused ? 'people' : 'people-outline'; break;
             case 'ThongKeTab': icon = focused ? 'bar-chart' : 'bar-chart-outline'; break;
             case 'CaiDatTab': icon = focused ? 'person' : 'person-outline'; break;
@@ -58,18 +60,28 @@ export const MainTabNavigator: React.FC = () => {
       <Tab.Screen
         name="KhoDeTab"
         component={KhoDeScreen}
-        options={{ tabBarLabel: isStudent ? 'Bài thi' : 'Kho đề' }}
+        options={{ tabBarLabel: isStudent ? 'Ôn tập' : 'Kho đề' }}
       />
-      <Tab.Screen
-        name="LopHocTab"
-        component={LopHocScreen}
-        options={{ tabBarLabel: isStudent ? 'Lớp' : 'Lớp học' }}
-      />
-      <Tab.Screen
-        name="ThongKeTab"
-        component={ThongKeScreen}
-        options={{ tabBarLabel: isStudent ? 'Kết quả' : 'Báo cáo' }}
-      />
+      {isStudent ? (
+        <Tab.Screen
+          name="ThongBaoTab"
+          component={ThongBaoScreen}
+          options={{ tabBarLabel: 'Thông báo' }}
+        />
+      ) : (
+        <>
+          <Tab.Screen
+            name="LopHocTab"
+            component={LopHocScreen}
+            options={{ tabBarLabel: 'Lớp học' }}
+          />
+          <Tab.Screen
+            name="ThongKeTab"
+            component={ThongKeScreen}
+            options={{ tabBarLabel: 'Báo cáo' }}
+          />
+        </>
+      )}
       <Tab.Screen
         name="CaiDatTab"
         component={CaiDatScreen}

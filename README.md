@@ -1,4 +1,4 @@
-# Flazers — Mobile Exam Management App
+# Quizken — Mobile Exam Management App
 
 > A React Native (Expo) mobile application for teachers to create, manage, and distribute exams to students. Built from a Figma design prototype.
 
@@ -6,7 +6,7 @@
 
 ## 📱 App Overview
 
-Flazers is a Vietnamese-language mobile app for exam management. Teachers can create exam banks, write questions manually or with AI assistance, distribute exams to classes, and view analytics. Students can take exams and see results.
+Quizken is a Vietnamese-language mobile app for exam management. Teachers can create exam banks, write questions manually or with AI assistance, distribute exams to classes, and view analytics. Students can take exams and see results.
 
 Figma reference map: see [`docs/figma-page-map.md`](./docs/figma-page-map.md) for the latest page sorting by `teacher`, `student`, `shared`, and `draft` screens.
 
@@ -24,7 +24,7 @@ Figma reference map: see [`docs/figma-page-map.md`](./docs/figma-page-map.md) fo
 ### Installation
 
 ```bash
-cd FlazersApp
+cd Quizken
 
 # Install dependencies (already done)
 npm install
@@ -75,7 +75,7 @@ Inside **Cài đặt**, the app also includes a local role switcher so you can s
 ## 🗂️ App Structure
 
 ```
-FlazersApp/
+Quizken/
 ├── App.tsx                         # Root entry point
 ├── src/
 │   ├── theme/

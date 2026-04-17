@@ -16,12 +16,14 @@ export type AuthStackParamList = {
 export type MainTabParamList = {
   DashboardTab: undefined;
   KhoDeTab: undefined;
+  ThongBaoTab: undefined;
   LopHocTab: undefined;
   ThongKeTab: undefined;
   CaiDatTab: undefined;
 };
 
 export type DashboardStackParamList = {
+  HomeTabs: undefined;
   Dashboard: undefined;
   KhoDeDetail: { tab?: 'open' | 'draft' | 'closed' };
   KhoDeExamDetail: { examId: string };
@@ -50,7 +52,6 @@ export type DashboardStackParamList = {
   LopHocDetail: { classId: string };
   HocSinhLamBai: { examId: string };
   KetQuaBaiThi: { examId: string };
-  MainTabs: undefined;
 };
 
 export interface Exam {

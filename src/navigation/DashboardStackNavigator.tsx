@@ -25,7 +25,7 @@ const Stack = createNativeStackNavigator<DashboardStackParamList>();
 export const DashboardStackNavigator: React.FC = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+      <Stack.Screen name="HomeTabs" component={MainTabNavigator} />
       <Stack.Screen name="KhoDeDetail" component={KhoDeDetailScreen} />
       <Stack.Screen name="KhoDeExamDetail" component={KhoDeExamDetailScreen} />
       <Stack.Screen name="KhoDeClassAnalytics" component={KhoDeClassAnalyticsScreen} />
