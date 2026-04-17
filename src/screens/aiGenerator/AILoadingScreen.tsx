@@ -104,7 +104,7 @@ export const AILoadingScreen: React.FC<Props> = ({ navigation }) => {
         hasNavigatedRef.current = true;
         clearInterval(interval);
         setTimeout(() => {
-          navigation.replace('SoanThaoCauHoi', { examId: 'new' });
+          navigation.replace('SoanThaoCauHoi', { examId: 'new', source: 'ai' });
         }, 350);
       }
     }, 110);

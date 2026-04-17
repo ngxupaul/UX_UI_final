@@ -5,17 +5,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../theme';
 import { DeleteConfirmDialog, ExamFlowHeader } from '../../components';
 import { useDraftExam } from '../../context/DraftExamContext';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useMockSession } from '../../context/MockSessionContext';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { DashboardStackParamList } from '../../types';
 
-interface Props {
-  navigation: NativeStackNavigationProp<DashboardStackParamList>;
-}
+type Props = NativeStackScreenProps<DashboardStackParamList, 'SoanThaoCauHoi'>;
 
-export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
+export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation, route }) => {
   const { draftExam, deleteQuestion } = useDraftExam();
+  const { currentUser } = useMockSession();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const hidePublishAction = currentUser.role === 'student';
 
   const handleDeletePress = (questionId: string) => setDeleteTarget(questionId);
   const handleDeleteConfirm = () => {
@@ -146,13 +147,15 @@ export const SoanThaoCauHoiScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         {/* Publish button */}
-        <TouchableOpacity
-          style={styles.publishBtn}
-          onPress={() => navigation.navigate('ThietLapDeThi', { examId: draftExam.examId })}
-        >
-          <Ionicons name="paper-plane-outline" size={18} color={Colors.white} />
-          <Text style={styles.publishBtnText}>Phát hành đề thi</Text>
-        </TouchableOpacity>
+        {!hidePublishAction ? (
+          <TouchableOpacity
+            style={styles.publishBtn}
+            onPress={() => navigation.navigate('ThietLapDeThi', { examId: draftExam.examId })}
+          >
+            <Ionicons name="paper-plane-outline" size={18} color={Colors.white} />
+            <Text style={styles.publishBtnText}>Phát hành đề thi</Text>
+          </TouchableOpacity>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );

@@ -174,11 +174,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 Cải thiện kiến thức với lộ trình cá nhân hóa
               </Text>
               <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate("HocSinhLamBai", {
-                    examId: upcomingStudentExam?.id ?? "exam-1",
-                  })
-                }
+                onPress={() => navigation.navigate("AIGenerator")}
                 style={styles.studentHeroButton}
               >
                 <Ionicons name="sparkles-outline" size={18} color={Colors.white} />

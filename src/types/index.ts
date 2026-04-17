@@ -1,5 +1,7 @@
 // Navigation & data types for Flazers app
 
+import type { NavigatorScreenParams } from '@react-navigation/native';
+
 export type RootStackParamList = {
   Splash: undefined;
   Onboarding: undefined;
@@ -23,7 +25,7 @@ export type MainTabParamList = {
 };
 
 export type DashboardStackParamList = {
-  HomeTabs: undefined;
+  HomeTabs: NavigatorScreenParams<MainTabParamList> | undefined;
   Dashboard: undefined;
   KhoDeDetail: { tab?: 'open' | 'draft' | 'closed' };
   KhoDeExamDetail: { examId: string };
@@ -41,7 +43,7 @@ export type DashboardStackParamList = {
     }>;
   };
   TaoDeThuCong: undefined;
-  SoanThaoCauHoi: { examId?: string };
+  SoanThaoCauHoi: { examId?: string; source?: 'manual' | 'ai' };
   LamThuDeThi: undefined;
   ThemCauHoi: { examId?: string; questionId?: string };
   ChinhSuaCauHoi: { examId: string; questionId: string };
