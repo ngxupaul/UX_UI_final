@@ -29,9 +29,27 @@ const SUBJECTS = [
 ];
 
 const DIFFICULTIES = [
-  { label: 'Dễ', selected: true },
-  { label: 'Trung bình', selected: false },
-  { label: 'Khó', selected: false },
+  {
+    label: 'Dễ',
+    selected: true,
+    borderColor: Colors.primary,
+    backgroundColor: '#E3FFDE',
+    textColor: '#139C2A',
+  },
+  {
+    label: 'Trung bình',
+    selected: false,
+    borderColor: '#F7C89B',
+    backgroundColor: Colors.white,
+    textColor: '#FB9F4A',
+  },
+  {
+    label: 'Khó',
+    selected: false,
+    borderColor: '#FFBEBE',
+    backgroundColor: Colors.white,
+    textColor: '#F18183',
+  },
 ];
 
 const QUESTION_TYPES = [
@@ -46,7 +64,6 @@ export const AIGeneratorScreen: React.FC<Props> = ({ navigation }) => {
   const [subjects, setSubjects] = useState(SUBJECTS);
   const [difficulties, setDifficulties] = useState(DIFFICULTIES);
   const [qTypes, setQTypes] = useState(QUESTION_TYPES);
-  const [attachedFileName, setAttachedFileName] = useState('Chương 3: Địa lý Việt Nam');
 
   const toggleSubject = (idx: number) => {
     setSubjects(subjects.map((s, i) => ({ ...s, selected: i === idx })));
@@ -68,8 +85,6 @@ export const AIGeneratorScreen: React.FC<Props> = ({ navigation }) => {
     if (result.canceled || !result.assets.length) {
       return;
     }
-
-    setAttachedFileName(result.assets[0].name);
   };
 
   return (
@@ -95,27 +110,24 @@ export const AIGeneratorScreen: React.FC<Props> = ({ navigation }) => {
             <TextInput
               style={styles.textInput}
               placeholder="Ví dụ: Tạo 10 câu trắc nghiệm Toán lớp 10 chuyên đề Vector, mức độ vận dụng cao, có lời giải chi tiết ..."
-              placeholderTextColor="#B7B7B7"
+              placeholderTextColor="#575C65"
               value={prompt}
               onChangeText={setPrompt}
               multiline
               textAlignVertical="top"
             />
-            <View style={styles.fileChip}>
-              <Ionicons name="document-text-outline" size={16} color="#777777" />
-              <Text style={styles.fileChipText} numberOfLines={1}>
-                {attachedFileName}
-              </Text>
-            </View>
             <View style={styles.toolbar}>
-              <TouchableOpacity style={styles.toolBtn}>
-                <Ionicons name="image-outline" size={20} color="#999" />
+              <TouchableOpacity
+                style={[styles.toolBtn, styles.fileToolBtn]}
+                onPress={handlePickDocument}
+              >
+                <Ionicons name="document-outline" size={22} color="#4E74C9" />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.toolBtn} onPress={handlePickDocument}>
-                <Ionicons name="document-text-outline" size={22} color="#999" />
+              <TouchableOpacity style={[styles.toolBtn, styles.imageToolBtn]}>
+                <Ionicons name="image" size={19} color="#C45DBC" />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.toolBtn}>
-                <Ionicons name="mic-outline" size={20} color="#999" />
+              <TouchableOpacity style={[styles.toolBtn, styles.micToolBtn]}>
+                <Ionicons name="mic" size={19} color="#C96B1E" />
               </TouchableOpacity>
             </View>
           </View>
@@ -145,10 +157,24 @@ export const AIGeneratorScreen: React.FC<Props> = ({ navigation }) => {
             {difficulties.map((d, i) => (
               <TouchableOpacity
                 key={d.label}
-                style={[styles.difficultyPill, d.selected && styles.difficultyPillActive]}
+                style={[
+                  styles.difficultyPill,
+                  {
+                    borderColor: d.borderColor,
+                    backgroundColor: d.selected ? d.backgroundColor : Colors.white,
+                  },
+                ]}
                 onPress={() => toggleDifficulty(i)}
               >
-                <Text style={[styles.difficultyText, d.selected && styles.difficultyTextActive]}>
+                <Text
+                  style={[
+                    styles.difficultyText,
+                    {
+                      color: d.textColor,
+                      fontWeight: d.selected ? '700' : '500',
+                    },
+                  ]}
+                >
                   {d.label}
                 </Text>
               </TouchableOpacity>
@@ -212,7 +238,7 @@ export const AIGeneratorScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.screenBg },
+  container: { flex: 1, backgroundColor: '#F8FAFB' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -229,8 +255,8 @@ const styles = StyleSheet.create({
   backBtn: { padding: 4 },
   historyBtn: { padding: 4 },
   headerTitle: { fontSize: 24, fontWeight: '700', color: Colors.textPrimary, letterSpacing: -0.6 },
-  scrollContent: { paddingBottom: 110 },
-  inputWrap: { paddingHorizontal: 20, paddingTop: 18 },
+  scrollContent: { paddingBottom: 104 },
+  inputWrap: { paddingHorizontal: 20, paddingTop: 17 },
   inputLabel: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -242,101 +268,86 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: '#D4D4D4',
+    borderColor: '#008B17',
     overflow: 'hidden',
-    minHeight: 194,
+    minHeight: 141,
+    position: 'relative',
   },
   textInput: {
     fontSize: 16,
     color: Colors.textPrimary,
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 12,
-    minHeight: 112,
+    paddingBottom: 46,
+    minHeight: 139,
     lineHeight: 25,
   },
-  fileChip: {
-    alignSelf: 'flex-start',
-    marginLeft: 16,
-    marginTop: 4,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#EEEEEE',
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  fileChipText: {
-    fontSize: 13,
-    color: '#666666',
-    fontWeight: '500',
-    maxWidth: 240,
-  },
   toolbar: {
+    position: 'absolute',
+    right: 11,
+    bottom: 6,
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 10,
-    paddingBottom: 10,
-    paddingTop: 12,
-    gap: 6,
+    gap: 12,
   },
   toolBtn: {
-    backgroundColor: '#EEE',
     borderRadius: 10,
     width: 30,
     height: 30,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  imageToolBtn: { backgroundColor: '#FFD0F9' },
+  fileToolBtn: { backgroundColor: '#BAD9FF' },
+  micToolBtn: { backgroundColor: '#FFBA96' },
   pillSection: {
     paddingLeft: 20,
     paddingTop: 20,
   },
   pillRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
     paddingRight: 20,
   },
   subjectPill: {
     height: 40,
     borderRadius: 10,
     backgroundColor: Colors.white,
-    minWidth: 110,
+    minWidth: 143,
     paddingHorizontal: 18,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#DBDBDB',
+    borderColor: 'rgba(19,156,42,0.45)',
   },
   subjectPillActive: {
-    backgroundColor: Colors.white,
-    borderColor: Colors.primary,
+    backgroundColor: '#E2FFE4',
+    borderColor: '#087E33',
     borderWidth: 1,
   },
-  subjectPillText: { fontSize: 14, fontWeight: '500', color: '#8C95A1' },
-  subjectPillTextActive: { fontWeight: '700', color: Colors.primary },
+  subjectPillText: { fontSize: 14, fontWeight: '500', color: '#087E33' },
+  subjectPillTextActive: { fontWeight: '700', color: '#087E33' },
   configSection: {
     paddingHorizontal: 20,
-    paddingTop: 24,
+    paddingTop: 27,
   },
   configSectionTitle: {
     fontSize: 14,
     fontWeight: '700',
     color: '#64748B',
     letterSpacing: 0.7,
-    marginBottom: 16,
+    marginBottom: 15,
   },
   fieldLabel: {
     fontSize: 14,
     fontWeight: '600',
     color: Colors.textPrimary,
-    marginBottom: 10,
-    marginTop: 12,
+    marginBottom: 13,
+    marginTop: 5,
   },
   difficultyRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 20,
+    marginBottom: 17,
   },
   difficultyPill: {
     flex: 1,
@@ -346,23 +357,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#DBDBDB',
   },
-  difficultyPillActive: {
-    borderColor: Colors.primary,
-    borderWidth: 1,
-    backgroundColor: Colors.white,
-  },
-  difficultyText: { fontSize: 14, fontWeight: '500', color: '#8C95A1' },
-  difficultyTextActive: { fontWeight: '700', color: Colors.primary },
+  difficultyText: { fontSize: 14 },
   typeCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.white,
     borderRadius: 12,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    marginBottom: 14,
+    height: 75,
+    paddingHorizontal: 23,
+    marginBottom: 15,
     borderWidth: 2,
     borderColor: 'rgba(149,149,149,0.3)',
   },
@@ -376,23 +380,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: 26,
   },
   typeInfo: { flex: 1 },
-  typeTitle: { fontSize: 16, fontWeight: '600', color: Colors.textPrimary, marginBottom: 2 },
-  typeDesc: { fontSize: 13, color: Colors.textSecondary },
+  typeTitle: { fontSize: 16, fontWeight: '600', color: Colors.textPrimary, marginBottom: 5 },
+  typeDesc: { fontSize: 13, color: '#000000' },
   countRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: Colors.white,
     borderRadius: 12,
-    paddingHorizontal: 17,
-    paddingVertical: 14,
+    height: 55,
+    paddingHorizontal: 24,
     borderWidth: 1,
     borderColor: '#C6C6C6',
-    marginTop: 8,
-    marginBottom: 24,
+    marginTop: 17,
+    marginBottom: 25,
   },
   countLabel: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary },
   counter: {
@@ -415,10 +419,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 20,
+    paddingHorizontal: 25,
     paddingTop: 10,
-    paddingBottom: 20,
-    backgroundColor: Colors.screenBg,
+    paddingBottom: 0,
+    backgroundColor: '#F8FAFB',
   },
   generateBtn: {
     flexDirection: 'row',
@@ -426,7 +430,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     backgroundColor: Colors.primary,
-    paddingVertical: 15,
+    height: 50,
     borderRadius: 15,
     shadowColor: 'rgba(33,196,93,0.3)',
     shadowOffset: { width: 0, height: 10 },

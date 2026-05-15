@@ -1,4 +1,5 @@
 import React from 'react';
+import { StyleSheet, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { DashboardScreen } from '../screens/dashboard/DashboardScreen';
@@ -13,6 +14,18 @@ import type { MainTabParamList } from '../types';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
+const getTabLabel = (routeName: keyof MainTabParamList, isStudent: boolean) => {
+  switch (routeName) {
+    case 'DashboardTab': return 'Dashboard';
+    case 'KhoDeTab': return isStudent ? 'Ôn tập' : 'Kho đề';
+    case 'ThongBaoTab': return 'Thông báo';
+    case 'LopHocTab': return 'Lớp học';
+    case 'ThongKeTab': return 'Báo cáo';
+    case 'CaiDatTab': return 'Hồ sơ';
+    default: return routeName;
+  }
+};
+
 export const MainTabNavigator: React.FC = () => {
   const { currentUser } = useMockSession();
   const isStudent = currentUser.role === 'student';
@@ -22,21 +35,31 @@ export const MainTabNavigator: React.FC = () => {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textMuted,
+        tabBarInactiveTintColor: '#000000',
         tabBarStyle: {
           backgroundColor: Colors.white,
-          borderTopWidth: 1,
-          borderTopColor: Colors.borderLight,
-          height: 80,
-          paddingBottom: 16,
-          paddingTop: 8,
+          borderTopWidth: 0,
+          height: 92,
+          paddingBottom: 22,
+          paddingTop: 12,
+          shadowColor: '#000000',
+          shadowOpacity: 0.15,
+          shadowRadius: 3,
+          shadowOffset: { width: 0, height: -2 },
+          elevation: 8,
         },
-        tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: '500',
-          textTransform: 'uppercase',
-          letterSpacing: 0.5,
-        },
+        tabBarItemStyle: styles.tabBarItem,
+        tabBarLabel: ({ focused, color }) => (
+          <Text
+            style={[
+              styles.tabBarLabel,
+              focused && styles.tabBarLabelActive,
+              { color },
+            ]}
+          >
+            {getTabLabel(route.name, isStudent)}
+          </Text>
+        ),
         tabBarIcon: ({ focused, color, size }) => {
           let icon: keyof typeof Ionicons.glyphMap;
           switch (route.name) {
@@ -48,45 +71,53 @@ export const MainTabNavigator: React.FC = () => {
             case 'CaiDatTab': icon = focused ? 'person' : 'person-outline'; break;
             default: icon = 'ellipse';
           }
-          return <Ionicons name={icon} size={24} color={color} />;
+          return <Ionicons name={icon} size={30} color={color} />;
         },
       })}
     >
       <Tab.Screen
         name="DashboardTab"
         component={DashboardScreen}
-        options={{ tabBarLabel: isStudent ? 'Trang chủ' : 'Dashboard' }}
       />
       <Tab.Screen
         name="KhoDeTab"
         component={KhoDeScreen}
-        options={{ tabBarLabel: isStudent ? 'Ôn tập' : 'Kho đề' }}
       />
       {isStudent ? (
         <Tab.Screen
           name="ThongBaoTab"
           component={ThongBaoScreen}
-          options={{ tabBarLabel: 'Thông báo' }}
         />
       ) : (
         <>
           <Tab.Screen
             name="LopHocTab"
             component={LopHocScreen}
-            options={{ tabBarLabel: 'Lớp học' }}
           />
           <Tab.Screen
             name="ThongKeTab"
             component={ThongKeScreen}
-            options={{ tabBarLabel: 'Báo cáo' }}
           />
         </>
       )}
       <Tab.Screen
         name="CaiDatTab"
         component={CaiDatScreen}
-        options={{ tabBarLabel: isStudent ? 'Cá nhân' : 'Hồ sơ' }}
       />
     </Tab.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  tabBarItem: {
+    gap: 4,
+  },
+  tabBarLabel: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '400',
+  },
+  tabBarLabelActive: {
+    fontWeight: '700',
+  },
+});

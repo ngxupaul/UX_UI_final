@@ -69,7 +69,7 @@ export const MOCK_USERS: MockUser[] = [
   },
   {
     id: "teacher-1",
-    name: "Nguyễn Thị Mai",
+    name: "Thầy Nam",
     email: "giaovien@flazers.vn",
     password: "teacher123",
     role: "teacher",
@@ -79,7 +79,7 @@ export const MOCK_USERS: MockUser[] = [
   },
   {
     id: "student-1",
-    name: "Lê Minh Học Sinh",
+    name: "Minh Quân",
     email: "hocsinh@flazers.vn",
     password: "student123",
     role: "student",

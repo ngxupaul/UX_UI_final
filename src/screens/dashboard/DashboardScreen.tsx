@@ -27,17 +27,23 @@ const TEACHER_STATS = [
   {
     label: "Tổng đề thi",
     value: "24",
-    icon: "document-text-outline" as const,
+    icon: "copy-outline" as const,
+    iconBg: "#ECFEFF",
+    iconColor: "#0891B2",
   },
   {
     label: "Đang mở",
     value: "06",
     icon: "timer-outline" as const,
+    iconBg: "#FCE7F3",
+    iconColor: "#A21CAF",
   },
   {
     label: "Lượt làm bài",
     value: "160",
     icon: "create-outline" as const,
+    iconBg: "#FEF3C7",
+    iconColor: "#B45309",
   },
 ];
 
@@ -53,10 +59,11 @@ const TEACHER_ACTIVITIES = [
   },
   {
     id: "activity-2",
-    accent: "#EFF6FF",
-    iconColor: "#3B82F6",
+    accent: "#ECFEFF",
+    iconColor: "#0891B2",
     icon: "sparkles-outline" as const,
-    titleBold: "Đề thi Toán Chương 1",
+    titlePrefix: "Đề thi",
+    titleBold: "Toán Chương 1",
     titleRest: "đã được tạo thành công",
     time: "15 phút trước",
   },
@@ -92,17 +99,29 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         label: "Bài thi",
         value: "12",
         icon: "checkmark-circle-outline" as const,
+        cardBg: "#C9EFFF",
+        valueColor: "#271A9D",
+        labelColor: "#4454AC",
+        iconColor: "#1D1BC4",
       },
       {
         label: "Trung bình",
         value: "8.5",
         icon: "star" as const,
         highlighted: true,
+        cardBg: "#93BD6B",
+        valueColor: "#161D16",
+        labelColor: "#3D4A3D",
+        iconColor: "#006E2F",
       },
       {
         label: "Thứ hạng",
         value: "#04",
         icon: "trophy-outline" as const,
+        cardBg: "#FFB2C4",
+        valueColor: "#AA082E",
+        labelColor: "#AA082E",
+        iconColor: "#AA082E",
       },
     ];
 
@@ -136,7 +155,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
     ];
 
     return (
-      <SafeAreaView style={styles.container} edges={["top"]}>
+      <SafeAreaView style={styles.studentContainer} edges={["top"]}>
         <ScrollView
           style={styles.teacherScroll}
           contentContainerStyle={styles.studentContent}
@@ -174,7 +193,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 Cải thiện kiến thức với lộ trình cá nhân hóa
               </Text>
               <TouchableOpacity
-                onPress={() => navigation.navigate("AIGenerator")}
+                onPress={() => navigation.navigate("KhoDeTab" as never)}
                 style={styles.studentHeroButton}
               >
                 <Ionicons name="sparkles-outline" size={18} color={Colors.white} />
@@ -193,6 +212,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 key={item.label}
                 style={[
                   styles.studentStatCard,
+                  { backgroundColor: item.cardBg },
                   item.highlighted && styles.studentStatCardActive,
                 ]}
               >
@@ -200,11 +220,15 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                   <Ionicons
                     name={item.icon}
                     size={20}
-                    color={item.highlighted ? "#006E2F" : "#161D16"}
+                    color={item.iconColor}
                   />
                 </View>
-                <Text style={styles.studentStatValue}>{item.value}</Text>
-                <Text style={styles.studentStatLabel}>{item.label}</Text>
+                <Text style={[styles.studentStatValue, { color: item.valueColor }]}>
+                  {item.value}
+                </Text>
+                <Text style={[styles.studentStatLabel, { color: item.labelColor }]}>
+                  {item.label}
+                </Text>
               </View>
             ))}
           </View>
@@ -225,7 +249,7 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
                 <View style={styles.studentMiniRingArc} />
                 <View style={styles.studentMiniRingInner}>
                   <Text style={styles.studentMiniRingValue}>
-                    {latestResult ? latestResult.score.toFixed(1) : "9.0"}
+                    9.0
                   </Text>
                 </View>
               </View>
@@ -374,15 +398,26 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
             </TouchableOpacity>
           </View>
           <View style={styles.heroIconWrap}>
-            <Ionicons name="bulb-outline" size={66} color={Colors.white} />
+            <Ionicons name="bulb-outline" size={62} color={Colors.white} />
+            <Ionicons
+              name="sparkles-outline"
+              size={22}
+              color={Colors.white}
+              style={styles.heroSparkleIcon}
+            />
           </View>
         </LinearGradient>
 
         <View style={styles.teacherStatsRow}>
           {TEACHER_STATS.map((item) => (
             <View key={item.label} style={styles.teacherStatCard}>
-              <View style={styles.teacherStatIconCircle}>
-                <Ionicons name={item.icon} size={22} color={Colors.primary} />
+              <View
+                style={[
+                  styles.teacherStatIconCircle,
+                  { backgroundColor: item.iconBg },
+                ]}
+              >
+                <Ionicons name={item.icon} size={22} color={item.iconColor} />
               </View>
               <Text style={styles.teacherStatValue}>{item.value}</Text>
               <Text style={styles.teacherStatLabel}>{item.label}</Text>
@@ -438,6 +473,9 @@ export const DashboardScreen: React.FC<Props> = ({ navigation }) => {
               </View>
               <View style={styles.activityTextWrap}>
                 <Text style={styles.activityTitle} numberOfLines={2}>
+                  {activity.titlePrefix ? (
+                    <Text>{activity.titlePrefix} </Text>
+                  ) : null}
                   <Text style={styles.activityTitleBold}>{activity.titleBold} </Text>
                   <Text>{activity.titleRest}</Text>
                 </Text>
@@ -458,6 +496,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F8F9FC",
   },
+  studentContainer: {
+    flex: 1,
+    backgroundColor: Colors.white,
+  },
   bottomSpacer: {
     height: 120,
   },
@@ -466,8 +508,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 18,
-    paddingHorizontal: 6,
+    marginBottom: 38,
+    paddingHorizontal: 14,
+    paddingTop: 10,
   },
   studentHeaderLeft: {
     flexDirection: "row",
@@ -475,10 +518,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   studentContent: {
-    paddingHorizontal: 15,
-    paddingTop: 10,
+    paddingHorizontal: 10,
+    paddingTop: 8,
     paddingBottom: 28,
-    gap: 22,
+    gap: 32,
   },
   studentAvatarWrap: {
     width: 40,
@@ -508,25 +551,26 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   studentGreeting: {
-    fontSize: 11,
-    lineHeight: 14,
+    fontSize: 12,
+    lineHeight: 16,
     color: "#3D4A3D",
-    fontWeight: "600",
-    letterSpacing: 0.9,
+    fontWeight: "400",
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
   },
   studentName: {
-    marginTop: 2,
+    marginTop: 0,
     fontSize: 18,
-    lineHeight: 24,
+    lineHeight: 28,
     fontWeight: "800",
     color: "#006E2F",
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
   studentHero: {
-    minHeight: 174,
-    borderRadius: 22,
-    paddingLeft: 20,
-    paddingRight: 16,
+    minHeight: 178,
+    borderRadius: 16,
+    paddingLeft: 21,
+    paddingRight: 21,
     paddingVertical: 20,
     flexDirection: "row",
     alignItems: "center",
@@ -542,27 +586,26 @@ const styles = StyleSheet.create({
     paddingRight: 8,
   },
   studentHeroTitle: {
-    fontSize: 28,
-    lineHeight: 34,
-    fontWeight: "800",
+    fontSize: 20,
+    lineHeight: 28,
+    fontWeight: "700",
     color: Colors.white,
-    letterSpacing: -0.7,
   },
   studentHeroSubtitle: {
-    marginTop: 8,
-    maxWidth: 188,
-    fontSize: 13,
-    lineHeight: 18,
-    color: "rgba(255,255,255,0.85)",
+    marginTop: 7,
+    maxWidth: 256,
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#F0FDF4",
   },
   studentHeroButton: {
-    marginTop: 18,
+    marginTop: 27,
     alignSelf: "flex-start",
     flexDirection: "row",
     alignItems: "center",
     gap: 7,
-    backgroundColor: "rgba(255,255,255,0.14)",
-    borderRadius: 999,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.16)",
     paddingHorizontal: 14,
@@ -574,8 +617,8 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   studentHeroIconWrap: {
-    width: 96,
-    height: 96,
+    width: 86,
+    height: 86,
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
@@ -592,16 +635,16 @@ const styles = StyleSheet.create({
   studentStatsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    gap: 12,
   },
   studentStatCard: {
-    width: "31.5%",
-    backgroundColor: Colors.white,
-    borderRadius: 18,
-    minHeight: 86,
+    flex: 1,
+    borderRadius: 20,
+    minHeight: 105,
     borderWidth: 1,
-    borderColor: "rgba(220,229,217,0.55)",
-    paddingHorizontal: 10,
-    paddingVertical: 12,
+    borderColor: "rgba(220,229,217,0.3)",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000000",
@@ -611,8 +654,8 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   studentStatCardActive: {
-    borderBottomWidth: 5,
-    borderBottomColor: "#21C45D",
+    borderBottomWidth: 4,
+    borderBottomColor: "rgba(0,110,47,0.2)",
   },
   studentStatIconWrap: {
     width: 22,
@@ -623,37 +666,33 @@ const styles = StyleSheet.create({
   },
   studentStatValue: {
     fontSize: 20,
-    lineHeight: 24,
-    fontWeight: "800",
-    color: "#161D16",
+    lineHeight: 28,
+    fontWeight: "700",
   },
   studentStatLabel: {
-    marginTop: 4,
+    marginTop: 0,
     fontSize: 9,
-    lineHeight: 12,
+    lineHeight: 14,
     fontWeight: "600",
-    color: "#3D4A3D",
     textAlign: "center",
     textTransform: "uppercase",
-    letterSpacing: 0.6,
+    letterSpacing: -0.45,
   },
   studentResultSection: {
-    gap: 12,
+    gap: 16,
   },
   studentSectionTitle: {
     fontSize: 18,
-    lineHeight: 24,
+    lineHeight: 28,
     fontWeight: "800",
     color: "#161D16",
   },
   studentResultCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 22,
+    backgroundColor: "#FCFDFC",
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(220,229,217,0.5)",
-    paddingVertical: 16,
-    paddingLeft: 16,
-    paddingRight: 14,
+    borderColor: "rgba(220,229,217,0.2)",
+    padding: 17,
     flexDirection: "row",
     alignItems: "center",
     shadowColor: "#000000",
@@ -663,36 +702,27 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   studentMiniRing: {
-    width: 68,
-    height: 68,
+    width: 64,
+    height: 64,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 14,
   },
   studentMiniRingBase: {
     position: "absolute",
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    borderWidth: 7,
-    borderColor: "#DFF3E4",
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 6,
+    borderColor: "#21C45D",
   },
   studentMiniRingArc: {
-    position: "absolute",
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    borderWidth: 7,
-    borderTopColor: Colors.primary,
-    borderLeftColor: Colors.primary,
-    borderBottomColor: Colors.primary,
-    borderRightColor: "transparent",
-    transform: [{ rotate: "28deg" }],
+    display: "none",
   },
   studentMiniRingInner: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: Colors.white,
     alignItems: "center",
     justifyContent: "center",
@@ -721,7 +751,7 @@ const styles = StyleSheet.create({
   },
   studentProgressTrack: {
     marginTop: 10,
-    height: 5,
+    height: 6,
     borderRadius: 999,
     backgroundColor: "#EEF3EE",
     overflow: "hidden",
@@ -736,7 +766,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   studentExamSection: {
-    gap: 12,
+    gap: 16,
   },
   studentSectionLink: {
     fontSize: 11,
@@ -747,10 +777,10 @@ const styles = StyleSheet.create({
   },
   studentExamCard: {
     backgroundColor: Colors.white,
-    borderRadius: 22,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(220,229,217,0.5)",
-    padding: 18,
+    padding: 21,
     shadowColor: "#000000",
     shadowOpacity: 0.04,
     shadowRadius: 10,
@@ -788,13 +818,16 @@ const styles = StyleSheet.create({
   },
   studentExamTitle: {
     marginTop: 16,
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 16,
+    lineHeight: 20,
     fontWeight: "700",
     color: "#161D16",
   },
   studentExamFooter: {
-    marginTop: 18,
+    marginTop: 16,
+    paddingTop: 9,
+    borderTopWidth: 1,
+    borderTopColor: "#F1F5F1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -978,8 +1011,15 @@ const styles = StyleSheet.create({
   },
   heroIconWrap: {
     width: 78,
+    height: 78,
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
+  },
+  heroSparkleIcon: {
+    position: "absolute",
+    right: 6,
+    top: 8,
   },
   teacherStatsRow: {
     flexDirection: "row",
@@ -1004,7 +1044,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#F0FDF4",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 12,
@@ -1025,6 +1064,7 @@ const styles = StyleSheet.create({
   },
   performanceCard: {
     marginTop: 22,
+    minHeight: 194,
     backgroundColor: Colors.white,
     borderRadius: 15,
     paddingHorizontal: 18,
@@ -1059,24 +1099,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   progressRingWrap: {
-    width: 132,
-    height: 132,
+    width: 114,
+    height: 114,
     alignItems: "center",
     justifyContent: "center",
   },
   progressRingBase: {
     position: "absolute",
-    width: 132,
-    height: 132,
-    borderRadius: 66,
+    width: 114,
+    height: 114,
+    borderRadius: 57,
     borderWidth: 14,
     borderColor: "#E5E7EB",
   },
   progressRingArc: {
     position: "absolute",
-    width: 132,
-    height: 132,
-    borderRadius: 66,
+    width: 114,
+    height: 114,
+    borderRadius: 57,
     borderWidth: 14,
     borderTopColor: Colors.primary,
     borderLeftColor: Colors.primary,
@@ -1085,9 +1125,9 @@ const styles = StyleSheet.create({
     transform: [{ rotate: "38deg" }],
   },
   progressInner: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+    width: 78,
+    height: 78,
+    borderRadius: 39,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors.white,
@@ -1108,7 +1148,7 @@ const styles = StyleSheet.create({
   },
   performanceLegend: {
     flex: 1,
-    paddingLeft: 18,
+    paddingLeft: 20,
     gap: 16,
   },
   legendRow: {
@@ -1135,7 +1175,7 @@ const styles = StyleSheet.create({
     color: "#475569",
   },
   recentSection: {
-    marginTop: 18,
+    marginTop: 22,
   },
   recentSectionTitle: {
     fontSize: 16,
@@ -1145,6 +1185,7 @@ const styles = StyleSheet.create({
   },
   activityCard: {
     marginTop: 12,
+    minHeight: 80,
     backgroundColor: Colors.white,
     borderRadius: 12,
     paddingHorizontal: 16,

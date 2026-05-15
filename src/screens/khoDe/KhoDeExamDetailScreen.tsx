@@ -20,6 +20,28 @@ const STATUS_META = {
   closed: { label: 'Đã đóng', bg: '#DCE5D9', text: '#3D4A3D' },
 } as const;
 
+const DESIGN_EXAM_DETAIL = {
+  examId: 'exam-2',
+  code: 'DIA6-001',
+  title: 'Kiểm tra 15 phút -\nChương 1',
+  subject: 'Địa lý 6',
+  date: '20/10/2023',
+  duration: '15 Phút',
+  questionCount: 20,
+  easyCount: 12,
+  hardCount: 8,
+  averageScore: '7.5',
+  passRate: '85%',
+  attempts: '45',
+  completionRate: 94,
+  insight:
+    '"Hầu hết học sinh gặp khó khăn ở các câu hỏi về đồ thị hàm số (Câu 14, 18). Nên dành thêm thời gian ôn tập phần này."',
+  classes: [
+    { name: 'Lớp 6A1', size: 42, submitted: 40, status: 'open' as const },
+    { name: 'Lớp 6A2', size: 40, submitted: 5, status: 'closed' as const },
+  ],
+};
+
 export const KhoDeExamDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const { currentUser } = useMockSession();
   const exam = getExamById(route.params.examId) ?? getExamById('exam-2') ?? getExamById('exam-1');
@@ -65,6 +87,71 @@ export const KhoDeExamDetailScreen: React.FC<Props> = ({ navigation, route }) =>
   const easyCount = Math.max(1, Math.round((exam?.questionCount ?? 0) * 0.6));
   const hardCount = Math.max(0, (exam?.questionCount ?? 0) - easyCount);
   const statusMeta = STATUS_META[exam?.status ?? 'open'];
+  const useDesignFixture = examId === DESIGN_EXAM_DETAIL.examId;
+  const displayExam = {
+    code: useDesignFixture ? DESIGN_EXAM_DETAIL.code : examId.toUpperCase(),
+    title: useDesignFixture ? DESIGN_EXAM_DETAIL.title : exam?.title ?? '',
+    subject: useDesignFixture ? DESIGN_EXAM_DETAIL.subject : exam?.subject ?? '',
+    date: useDesignFixture ? DESIGN_EXAM_DETAIL.date : exam?.updatedAt ?? '',
+    duration: useDesignFixture ? DESIGN_EXAM_DETAIL.duration : `${exam?.duration ?? 0} Phút`,
+    questionCount: useDesignFixture ? DESIGN_EXAM_DETAIL.questionCount : exam?.questionCount ?? 0,
+    easyCount: useDesignFixture ? DESIGN_EXAM_DETAIL.easyCount : easyCount,
+    hardCount: useDesignFixture ? DESIGN_EXAM_DETAIL.hardCount : hardCount,
+    averageScore: useDesignFixture
+      ? DESIGN_EXAM_DETAIL.averageScore
+      : averageScore.toFixed(1),
+    passRate: useDesignFixture ? DESIGN_EXAM_DETAIL.passRate : `${passRate}%`,
+    attempts: useDesignFixture ? DESIGN_EXAM_DETAIL.attempts : String(teacherResults.length),
+    completionRate: useDesignFixture ? DESIGN_EXAM_DETAIL.completionRate : completionRate,
+    insight: useDesignFixture
+      ? DESIGN_EXAM_DETAIL.insight
+      : '"Hầu hết học sinh gặp khó khăn ở các câu hỏi cuối bài. Nên dành thêm thời gian ôn tập phần này."',
+  };
+  const displayClasses = useMemo(() => {
+    if (useDesignFixture) {
+      return DESIGN_EXAM_DETAIL.classes.map((item, index) => ({
+        id: assignedClasses[index]?.id ?? item.name,
+        ...item,
+      }));
+    }
+
+    return assignedClasses.map((item, index) => ({
+      id: item.id,
+      name: item.name,
+      size: item.size,
+      submitted: item.submitted,
+      status: index === 0 && exam?.status === 'open' ? 'open' as const : 'closed' as const,
+    }));
+  }, [assignedClasses, exam?.status, useDesignFixture]);
+  const metricCards = [
+    {
+      label: 'ĐIỂM TB',
+      value: displayExam.averageScore,
+      icon: 'star' as const,
+      cardBg: 'rgba(239,218,175,0.3)',
+      iconBg: '#EFDAAF',
+      iconColor: '#D74F11',
+      valueColor: '#D74F11',
+    },
+    {
+      label: 'TỈ LỆ ĐẠT',
+      value: displayExam.passRate,
+      icon: 'checkmark-circle' as const,
+      cardBg: 'rgba(251,181,255,0.2)',
+      iconBg: '#FBB5FF',
+      iconColor: '#65006E',
+      valueColor: '#65006E',
+    },
+    {
+      label: 'LƯỢT LÀM',
+      value: displayExam.attempts,
+      icon: 'people-outline' as const,
+      cardBg: 'rgba(184,210,255,0.2)',
+      iconBg: '#B8D2FF',
+      iconColor: '#241C8E',
+      valueColor: '#241C8E',
+    },
+  ];
 
   if (!exam) {
     return (
@@ -108,72 +195,54 @@ export const KhoDeExamDetailScreen: React.FC<Props> = ({ navigation, route }) =>
               <Text style={styles.importantBadgeText}>QUAN TRỌNG</Text>
             </View>
             <View style={styles.codeBadge}>
-              <Text style={styles.codeBadgeText}>Mã đề: #{exam.id.toUpperCase()}</Text>
+              <Text style={styles.codeBadgeText}>Mã đề: #{displayExam.code}</Text>
             </View>
           </View>
 
-          <Text style={styles.heroTitle}>{exam.title}</Text>
+          <Text style={styles.heroTitle}>{displayExam.title}</Text>
 
           <View style={styles.heroMetaRow}>
             <View style={styles.metaItem}>
               <Ionicons name="book-outline" size={14} color="#006E2F" />
-              <Text style={styles.metaText}>{exam.subject}</Text>
+              <Text style={styles.metaText}>{displayExam.subject}</Text>
             </View>
             <View style={styles.metaItem}>
               <Ionicons name="calendar-outline" size={14} color="#006E2F" />
-              <Text style={styles.metaText}>{exam.updatedAt}</Text>
+              <Text style={styles.metaText}>{displayExam.date}</Text>
             </View>
             <View style={styles.metaItem}>
               <Ionicons name="time-outline" size={14} color="#006E2F" />
-              <Text style={styles.metaText}>{exam.duration} Phút</Text>
+              <Text style={styles.metaText}>{displayExam.duration}</Text>
             </View>
           </View>
         </View>
 
         <View style={styles.totalCard}>
           <Text style={styles.totalLabel}>TỔNG SỐ CÂU HỎI</Text>
-          <Text style={styles.totalValue}>{exam.questionCount}</Text>
+          <Text style={styles.totalValue}>{displayExam.questionCount}</Text>
           <View style={styles.totalBreakdownRow}>
             <View style={styles.totalBreakdownCard}>
               <Text style={styles.totalBreakdownLabel}>Dễ</Text>
-              <Text style={styles.totalBreakdownValue}>{easyCount}</Text>
+              <Text style={styles.totalBreakdownValue}>{displayExam.easyCount}</Text>
             </View>
             <View style={styles.totalBreakdownCard}>
               <Text style={styles.totalBreakdownLabel}>Khó</Text>
-              <Text style={styles.totalBreakdownValue}>{hardCount}</Text>
+              <Text style={styles.totalBreakdownValue}>{displayExam.hardCount}</Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.statCard}>
-          <View style={[styles.statIconWrap, { backgroundColor: '#AFEFB4' }]}>
-            <Ionicons name="star" size={18} color="#295E2A" />
+        {metricCards.map((item) => (
+          <View key={item.label} style={[styles.statCard, { backgroundColor: item.cardBg }]}>
+            <View style={[styles.statIconWrap, { backgroundColor: item.iconBg }]}>
+              <Ionicons name={item.icon} size={18} color={item.iconColor} />
+            </View>
+            <View>
+              <Text style={styles.statLabel}>{item.label}</Text>
+              <Text style={[styles.statValue, { color: item.valueColor }]}>{item.value}</Text>
+            </View>
           </View>
-          <View>
-            <Text style={styles.statLabel}>ĐIỂM TB</Text>
-            <Text style={styles.statValue}>{averageScore.toFixed(1)}</Text>
-          </View>
-        </View>
-
-        <View style={styles.statCard}>
-          <View style={[styles.statIconWrap, { backgroundColor: 'rgba(33,196,93,0.2)' }]}>
-            <Ionicons name="checkmark-circle" size={18} color="#006E2F" />
-          </View>
-          <View>
-            <Text style={styles.statLabel}>TỈ LỆ ĐẠT</Text>
-            <Text style={styles.statValue}>{passRate}%</Text>
-          </View>
-        </View>
-
-        <View style={styles.statCard}>
-          <View style={[styles.statIconWrap, { backgroundColor: '#E8F0E4' }]}>
-            <Ionicons name="people-outline" size={18} color="#3D4A3D" />
-          </View>
-          <View>
-            <Text style={styles.statLabel}>LƯỢT LÀM</Text>
-            <Text style={styles.statValue}>{teacherResults.length}</Text>
-          </View>
-        </View>
+        ))}
 
         <View style={styles.insightCard}>
           <Text style={styles.insightTitle}>Insight AI</Text>
@@ -182,29 +251,26 @@ export const KhoDeExamDetailScreen: React.FC<Props> = ({ navigation, route }) =>
             <View style={styles.insightDotMid} />
             <View style={styles.insightDotLight} />
           </View>
-          <Text style={styles.insightBody}>
-            "Hầu hết học sinh gặp khó khăn ở các câu hỏi cuối bài. Nên dành thêm thời gian ôn tập
-            phần này."
-          </Text>
+          <Text style={styles.insightBody}>{displayExam.insight}</Text>
 
           <View style={styles.completionBlock}>
             <Text style={styles.completionLabel}>TỈ LỆ HOÀN THÀNH</Text>
             <View style={styles.completionTrack}>
-              <View style={[styles.completionFill, { width: `${completionRate}%` }]} />
+              <View style={[styles.completionFill, { width: `${displayExam.completionRate}%` }]} />
             </View>
-            <Text style={styles.completionValue}>{completionRate}% Đã nộp bài</Text>
+            <Text style={styles.completionValue}>{displayExam.completionRate}% Đã nộp bài</Text>
           </View>
         </View>
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Lớp học đang gán</Text>
           <Text style={styles.sectionMeta}>
-            {String(assignedClasses.length).padStart(2, '0')} LỚP TỔNG CỘNG
+            {String(displayClasses.length).padStart(2, '0')} LỚP TỔNG CỘNG
           </Text>
         </View>
 
-        {assignedClasses.map((item, index) => {
-          const isOpen = index === 0 && exam.status === 'open';
+        {displayClasses.map((item) => {
+          const isOpen = item.status === 'open';
           const status = isOpen ? statusMeta : STATUS_META.closed;
 
           return (
